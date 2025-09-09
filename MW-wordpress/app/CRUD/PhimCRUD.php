@@ -2,101 +2,61 @@
 
 namespace App\CRUD;
 
-use App\Models\Phim;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use App\Repositories\Contracts\PhimRepositoryInterface;
 
 /**
- * Class PhimCRUD
- * Đặt ở app/CRUD/PhimCRUD.php
+ * PhimCRUD kế thừa BaseCRUD.
  *
- * Lưu ý:
- * - File này là "CRUD helper" có thể được gọi từ routes hoặc controller.
- * - Trả về JsonResponse để tiện test nhanh.
+ * Không khai lại property $repo (tồn tại ở BaseCRUD).
  */
-class PhimCRUD
+class PhimCRUD extends BaseCRUD
 {
-    // Lấy tất cả phim
-    public function index()
+    /**
+     * Constructor nhận PhimRepositoryInterface
+     *
+     * @param PhimRepositoryInterface $repo
+     */
+    public function __construct(PhimRepositoryInterface $repo)
     {
-        $phims = Phim::orderBy('MaPhim', 'desc')->get();
-        return response()->json(['success' => true, 'data' => $phims], 200);
+        // parent sẽ gán $this->repo (kiểu BaseRepositoryInterface ở mức parent)
+        parent::__construct($repo);
     }
 
-    // Lấy phim theo id
-    public function show($id)
+    /**
+     * Tìm phim theo tiêu đề (sử dụng repository).
+     *
+     * @param string $q
+     * @return mixed
+     */
+    public function searchByTitle(string $q)
     {
-        $phim = Phim::find($id);
-        if (!$phim) {
-            return response()->json(['success' => false, 'message' => 'Không tìm thấy phim'], 404);
+        // Gán local var và annotate để IDE biết đây là PhimRepositoryInterface
+        /** @var PhimRepositoryInterface $repo */
+        $repo = $this->repo;
+
+        // Runtime safety: đảm bảo object thực sự implement interface
+        if (! $repo instanceof PhimRepositoryInterface) {
+            throw new \RuntimeException('Repository injected to PhimCRUD must implement PhimRepositoryInterface.');
         }
-        return response()->json(['success' => true, 'data' => $phim], 200);
+
+        return $repo->findByTitle($q);
     }
 
-    // Tạo phim mới
-    public function store(Request $request)
+    /**
+     * Phân trang (dùng method đặc thù của PhimRepository).
+     *
+     * @param int $perPage
+     * @return mixed
+     */
+    public function paginate(int $perPage = 10)
     {
-        $rules = [
-            'TenPhim' => 'required|string|max:255',
-            'ThoiLuong' => 'nullable|integer|min:0',
-            'NgayKhoiChieu' => 'nullable|date',
-            'NuocSanXuat' => 'nullable|string|max:255',
-            'DinhDang' => 'nullable|string|max:255',
-            'MoTa' => 'nullable|string',
-            'DaoDien' => 'nullable|string|max:255',
-            'DuongDanPoster' => 'nullable|string|max:1000',
-        ];
+        /** @var PhimRepositoryInterface $repo */
+        $repo = $this->repo;
 
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        if (! $repo instanceof PhimRepositoryInterface) {
+            throw new \RuntimeException('Repository injected to PhimCRUD must implement PhimRepositoryInterface.');
         }
 
-        $data = $validator->validated();
-
-        // Mass assignment: đảm bảo App\Models\Phim có $fillable chứa các field này
-        $phim = Phim::create($data);
-
-        return response()->json(['success' => true, 'data' => $phim], 201);
-    }
-
-    // Cập nhật phim
-    public function update(Request $request, $id)
-    {
-        $phim = Phim::find($id);
-        if (!$phim) {
-            return response()->json(['success' => false, 'message' => 'Không tìm thấy phim'], 404);
-        }
-
-        $rules = [
-            'TenPhim' => 'sometimes|required|string|max:255',
-            'ThoiLuong' => 'nullable|integer|min:0',
-            'NgayKhoiChieu' => 'nullable|date',
-            'NuocSanXuat' => 'nullable|string|max:255',
-            'DinhDang' => 'nullable|string|max:255',
-            'MoTa' => 'nullable|string',
-            'DaoDien' => 'nullable|string|max:255',
-            'DuongDanPoster' => 'nullable|string|max:1000',
-        ];
-
-        $validator = Validator::make($request->all(), $rules);
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
-        }
-
-        $phim->update($validator->validated());
-
-        return response()->json(['success' => true, 'data' => $phim], 200);
-    }
-
-    // Xóa phim
-    public function destroy($id)
-    {
-        $phim = Phim::find($id);
-        if (!$phim) {
-            return response()->json(['success' => false, 'message' => 'Không tìm thấy phim'], 404);
-        }
-        $phim->delete();
-        return response()->json(['success' => true, 'message' => 'Xóa thành công'], 200);
+        return $repo->paginate($perPage);
     }
 }
