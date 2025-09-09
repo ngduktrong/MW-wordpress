@@ -1,6 +1,12 @@
 <?php
+
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
+
+
+Route::get('/', function () {
+    return view('phims.index');
+});
 
 Route::get('/test-db', function () {
     try {
@@ -11,7 +17,10 @@ Route::get('/test-db', function () {
 
         // danh sách bảng (SHOW TABLES)
         $tablesRaw = DB::select('SHOW TABLES');
-        $tables = array_map(function ($t) { $a = (array)$t; return array_values($a)[0]; }, $tablesRaw);
+        $tables = array_map(function ($t) { 
+            $a = (array)$t; 
+            return array_values($a)[0]; 
+        }, $tablesRaw);
 
         // show LIKE checks + information_schema (case-insensitive find)
         $likeUpper = DB::select("SHOW TABLES LIKE 'Phim'");
@@ -41,3 +50,9 @@ Route::get('/test-db', function () {
     }
 });
 
+// API routes for phims
+Route::get('/phims', 'PhimController@index');
+Route::get('/phims/{id}', 'PhimController@show');
+Route::post('/phims', 'PhimController@store');
+Route::put('/phims/{id}', 'PhimController@update');
+Route::delete('/phims/{id}', 'PhimController@destroy');
