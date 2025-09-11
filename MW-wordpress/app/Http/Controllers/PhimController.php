@@ -2,87 +2,93 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\Contracts\PhimRepositoryInterface;
 use Illuminate\Http\Request;
+use App\Models\Phim;
 
-class PhimController extends Controller
+class PhimController extends BaseCrudController
 {
-    protected PhimRepositoryInterface $phimRepo;
+    /**
+     * Nếu BaseCrudController của bạn dùng $modelClass / $resource,
+     * khai báo cho khớp để phần chung có thể sử dụng.
+     */
+    protected $modelClass = Phim::class;
 
-    public function __construct(PhimRepositoryInterface $phimRepo)
-    {
-        $this->phimRepo = $phimRepo;
-    }
+    /**
+     * Tên resource/view prefix.
+     * Mình để 'phim' để khớp route resource('phim', ...) và view 'phim.index'.
+     * Nếu project của bạn dùng 'phims' thì đổi lại thành 'phims'.
+     */
+    protected $resource = 'phim';
 
-    // GET /phims or /phims?q=...
+    /**
+     * Quy tắc validate khớp với các cột trong migration và $fillable của Model.
+     */
+    protected $validationRules = [
+        'ten_phim' => 'required|string|max:255',
+        'thoi_luong' => 'nullable|integer',
+        'ngay_khoi_chieu' => 'nullable|date',
+        'nuoc_san_xuat' => 'nullable|string|max:50',
+        'dinh_dang' => 'nullable|string|max:20',
+        'mo_ta' => 'nullable|string',
+        'dao_dien' => 'nullable|string|max:100',
+        'duong_dan_poster' => 'nullable|string',
+    ];
+
+    /**
+     * Hiển thị danh sách (với phân trang).
+     */
     public function index(Request $request)
     {
-        if ($request->has('q')) {
-            $data = $this->phimRepo->findByTitle($request->get('q'));
-            return response()->json($data);
+        $perPage = max(1, (int) $request->get('per_page', 15));
+        $items = Phim::orderBy('ma_phim', 'desc')->paginate($perPage);
+
+        if ($request->wantsJson()) {
+            return response()->json($items);
         }
 
-        $perPage = (int) $request->get('per_page', 15);
-        $data = $this->phimRepo->paginate($perPage);
-        return response()->json($data);
+        // View: resources/views/phim/index.blade.php
+        return view('phim.index', compact('items'));
     }
 
-    // GET /phims/{id}
-    public function show($id)
-    {
-        $phim = $this->phimRepo->find($id);
-        if (! $phim) {
-            return response()->json(['message' => 'Phim không tồn tại'], 404);
-        }
-        return response()->json($phim);
-    }
-
-    // POST /phims
+    /**
+     * Lưu bản ghi mới.
+     */
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'TenPhim' => 'required|string|max:100',
-            'ThoiLuong' => 'required|integer|min:1',
-            'NgayKhoiChieu' => 'required|date',
-            'NuocSanXuat' => 'required|string|max:50',
-            'DinhDang' => 'required|string|max:20',
-            'MoTa' => 'nullable|string',
-            'DaoDien' => 'required|string|max:100',
-            'DuongDanPoster' => 'nullable|string',
-        ]);
+        $data = $request->validate($this->validationRules);
 
-        $phim = $this->phimRepo->create($validated);
-        return response()->json($phim, 201);
+        // Tạo mới — Model phải có $fillable tương ứng
+        $phim = Phim::create($data);
+
+        return redirect()->route('phim.index')->with('success', 'Tạo phim thành công');
     }
 
-    // PUT/PATCH /phims/{id}
+    /**
+     * Cập nhật bản ghi.
+     * $id sẽ là giá trị của primary key (ma_phim) — Model đã cấu hình $primaryKey.
+     */
     public function update(Request $request, $id)
     {
-        $validated = $request->validate([
-            'TenPhim' => 'sometimes|required|string|max:100',
-            'ThoiLuong' => 'sometimes|required|integer|min:1',
-            'NgayKhoiChieu' => 'sometimes|required|date',
-            'NuocSanXuat' => 'sometimes|required|string|max:50',
-            'DinhDang' => 'sometimes|required|string|max:20',
-            'MoTa' => 'nullable|string',
-            'DaoDien' => 'sometimes|required|string|max:100',
-            'DuongDanPoster' => 'nullable|string',
-        ]);
+        $data = $request->validate($this->validationRules);
 
-        $updated = $this->phimRepo->update($id, $validated);
-        if (! $updated) {
-            return response()->json(['message' => 'Cập nhật thất bại hoặc phim không tồn tại'], 404);
-        }
-        return response()->json($updated);
+        $phim = Phim::findOrFail($id);
+        $phim->update($data);
+
+        return redirect()->route('phim.index')->with('success', 'Cập nhật phim thành công');
     }
 
-    // DELETE /phims/{id}
-    public function destroy($id)
+    /**
+     * Xóa bản ghi.
+     */
+    public function destroy(Request $request, $id)
     {
-        $deleted = $this->phimRepo->delete($id);
-        if (! $deleted) {
-            return response()->json(['message' => 'Xóa thất bại hoặc phim không tồn tại'], 404);
+        $phim = Phim::findOrFail($id);
+        $phim->delete();
+
+        if ($request->wantsJson()) {
+            return response()->json(null, 204);
         }
-        return response()->json(['message' => 'Xóa thành công']);
+
+        return redirect()->route('phim.index')->with('success', 'Xóa phim thành công');
     }
 }

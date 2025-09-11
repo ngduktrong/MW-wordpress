@@ -4,9 +4,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
 
-Route::get('/', function () {
-    return view('phims.index');
-});
+use App\Http\Controllers\PhimController;
+Route::resource('phim', PhimController::class);
 
 Route::get('/test-db', function () {
     try {
@@ -49,10 +48,3 @@ Route::get('/test-db', function () {
         return ['error' => $e->getMessage()];
     }
 });
-
-// API routes for phims
-Route::get('/phims', 'PhimController@index');
-Route::get('/phims/{id}', 'PhimController@show');
-Route::post('/phims', 'PhimController@store');
-Route::put('/phims/{id}', 'PhimController@update');
-Route::delete('/phims/{id}', 'PhimController@destroy');
