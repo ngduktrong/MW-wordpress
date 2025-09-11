@@ -2,21 +2,35 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Ghe extends Model
 {
-    protected $table = 'ghe';        // tên bảng trong DB
-    public $timestamps = false;      // nếu không có created_at, updated_at
+    use HasFactory;
+
+    protected $table = 'Ghe';
+    public $timestamps = false;
+    public $incrementing = false;
 
     protected $fillable = [
         'MaPhong',
         'SoGhe'
     ];
 
-    // Ghế thuộc về một phòng chiếu
+    /**
+     * Mối quan hệ với bảng PhongChieu
+     */
     public function phongChieu()
     {
         return $this->belongsTo(PhongChieu::class, 'MaPhong', 'MaPhong');
+    }
+
+    /**
+     * Mối quan hệ với bảng Ve
+     */
+    public function ves()
+    {
+        return $this->hasMany(Ve::class, ['MaPhong', 'SoGhe'], ['MaPhong', 'SoGhe']);
     }
 }

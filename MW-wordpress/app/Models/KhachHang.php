@@ -2,43 +2,66 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class KhachHang extends NguoiDung
+class KhachHang extends Model
 {
-    protected $table = 'khach_hang';
+    use HasFactory;
+
+    protected $table = 'KhachHang';
     protected $primaryKey = 'MaNguoiDung';
-    public $incrementing = false; // vì MaNguoiDung là FK từ bảng nguoi_dung
+    public $incrementing = false;
     public $timestamps = false;
 
     protected $fillable = [
         'MaNguoiDung',
-        'DiemTichLuy',
+        'DiemTichLuy'
     ];
 
-    // Quan hệ 1-1: KhachHang thuộc về 1 NguoiDung
+    protected $casts = [
+        'DiemTichLuy' => 'integer'
+    ];
+
+    /**
+     * Mối quan hệ với bảng NguoiDung
+     */
     public function nguoiDung()
     {
         return $this->belongsTo(NguoiDung::class, 'MaNguoiDung', 'MaNguoiDung');
     }
 
-    // Getter để tránh null
-    public function getDiemTichLuyAttribute($value)
+    /**
+     * Mối quan hệ với bảng HoaDon
+     */
+    public function hoaDons()
     {
-        return $value ?? 0;
+        return $this->hasMany(HoaDon::class, 'MaKhachHang', 'MaNguoiDung');
     }
 
-    // Cộng điểm tích lũy
-    public function congDiem($soDiem)
+    /**
+     * Tăng điểm tích lũy cho khách hàng
+     */
+    public function tangDiemTichLuy($diem)
     {
-        $this->DiemTichLuy += $soDiem;
-        $this->save();
+        $this->DiemTichLuy += $diem;
+        return $this->save();
     }
 
-    // Trừ điểm tích lũy (có kiểm tra không âm)
-    public function truDiem($soDiem)
+    /**
+     * Giảm điểm tích lũy cho khách hàng
+     */
+    public function giamDiemTichLuy($diem)
     {
-        $this->DiemTichLuy = max(0, $this->DiemTichLuy - $soDiem);
-        $this->save();
+        $this->DiemTichLuy = max(0, $this->DiemTichLuy - $diem);
+        return $this->save();
+    }
+
+    /**
+     * Scope để lọc khách hàng có điểm tích lũy tối thiểu
+     */
+    public function scopeCoDiemTichLuy($query, $diemToiThieu)
+    {
+        return $query->where('DiemTichLuy', '>=', $diemToiThieu);
     }
 }

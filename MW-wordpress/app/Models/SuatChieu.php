@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class SuatChieu extends Model
 {
-    protected $table = 'suatchieu';      // tên bảng trong DB
+    use HasFactory;
+
+    protected $table = 'SuatChieu';
     protected $primaryKey = 'MaSuatChieu';
-    public $timestamps = false;          // nếu bảng không có created_at, updated_at
+    public $timestamps = false;
 
     protected $fillable = [
         'MaPhim',
@@ -16,24 +19,31 @@ class SuatChieu extends Model
         'NgayGioChieu'
     ];
 
-    // ✅ Accessor để format ngày giờ chiếu
-    public function getNgayGioChieuFormattedAttribute()
-    {
-        if (!$this->NgayGioChieu) {
-            return null;
-        }
-        return date('d-m-Y H:i', strtotime($this->NgayGioChieu));
-    }
+    protected $casts = [
+        'NgayGioChieu' => 'datetime'
+    ];
 
-    // ✅ Quan hệ: Suất chiếu thuộc về 1 phim
+    /**
+     * Mối quan hệ với bảng Phim
+     */
     public function phim()
     {
         return $this->belongsTo(Phim::class, 'MaPhim', 'MaPhim');
     }
 
-    // ✅ Quan hệ: Suất chiếu thuộc về 1 phòng
-    public function phong()
+    /**
+     * Mối quan hệ với bảng PhongChieu
+     */
+    public function phongChieu()
     {
         return $this->belongsTo(PhongChieu::class, 'MaPhong', 'MaPhong');
+    }
+
+    /**
+     * Mối quan hệ với bảng Ve
+     */
+    public function ves()
+    {
+        return $this->hasMany(Ve::class, 'MaSuatChieu', 'MaSuatChieu');
     }
 }

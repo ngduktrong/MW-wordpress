@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class HoaDon extends Model
 {
-    protected $table = 'hoadon';          // tên bảng trong DB
+    use HasFactory;
+
+    protected $table = 'HoaDon';
     protected $primaryKey = 'MaHoaDon';
-    public $timestamps = false;           // nếu không có created_at, updated_at
+    public $timestamps = false;
 
     protected $fillable = [
         'MaNhanVien',
@@ -17,20 +20,31 @@ class HoaDon extends Model
         'TongTien'
     ];
 
-    // Một hóa đơn thuộc về một nhân viên
+    protected $casts = [
+        'NgayLap' => 'datetime',
+        'TongTien' => 'decimal:2'
+    ];
+
+    /**
+     * Mối quan hệ với bảng NhanVien
+     */
     public function nhanVien()
     {
-        return $this->belongsTo(NguoiDung::class, 'MaNhanVien', 'MaNguoiDung');
+        return $this->belongsTo(NhanVien::class, 'MaNhanVien', 'MaNguoiDung');
     }
 
-    // Một hóa đơn thuộc về một khách hàng
+    /**
+     * Mối quan hệ với bảng KhachHang
+     */
     public function khachHang()
     {
-        return $this->belongsTo(NguoiDung::class, 'MaKhachHang', 'MaNguoiDung');
+        return $this->belongsTo(KhachHang::class, 'MaKhachHang', 'MaNguoiDung');
     }
 
-    // Một hóa đơn có nhiều vé
-    public function ve()
+    /**
+     * Mối quan hệ với bảng Ve
+     */
+    public function ves()
     {
         return $this->hasMany(Ve::class, 'MaHoaDon', 'MaHoaDon');
     }

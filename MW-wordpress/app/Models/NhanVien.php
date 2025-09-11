@@ -2,55 +2,82 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class NhanVien extends NguoiDung
+class NhanVien extends Model
 {
-    protected $table = 'nhan_vien';
+    use HasFactory;
+
+    protected $table = 'NhanVien';
     protected $primaryKey = 'MaNguoiDung';
-    public $incrementing = false; // Vì MaNguoiDung là khóa ngoại từ NguoiDung
+    public $incrementing = false;
     public $timestamps = false;
 
     protected $fillable = [
         'MaNguoiDung',
-        'VaiTro',
         'ChucVu',
         'Luong',
+        'VaiTro'
     ];
 
-    // Các vai trò cho nhân viên
-    const VAITRO_ADMIN   = 'Admin';
-    const VAITRO_QUANLY  = 'QuanLy';
-    const VAITRO_THUNGAN = 'ThuNgan';
-    const VAITRO_BANVE   = 'BanVe';
+    protected $casts = [
+        'Luong' => 'decimal:2'
+    ];
 
-    // Quan hệ 1-1: NhanVien thuộc về 1 NguoiDung
+    /**
+     * Mối quan hệ với bảng NguoiDung
+     */
     public function nguoiDung()
     {
         return $this->belongsTo(NguoiDung::class, 'MaNguoiDung', 'MaNguoiDung');
     }
 
-    // Getter cho vai trò (trả về in hoa chữ cái đầu)
-    public function getVaiTroAttribute($value)
+    /**
+     * Mối quan hệ với bảng HoaDon
+     */
+    public function hoaDons()
     {
-        return ucfirst($value);
+        return $this->hasMany(HoaDon::class, 'MaNhanVien', 'MaNguoiDung');
     }
 
-    // Setter để chuẩn hóa giá trị vai trò
-    public function setVaiTroAttribute($value)
+    /**
+     * Kiểm tra xem nhân viên có phải là Admin không
+     */
+    public function isAdmin()
     {
-        $roles = [
-            self::VAITRO_ADMIN,
-            self::VAITRO_QUANLY,
-            self::VAITRO_THUNGAN,
-            self::VAITRO_BANVE
-        ];
-        $this->attributes['VaiTro'] = in_array($value, $roles) ? $value : self::VAITRO_BANVE;
+        return $this->VaiTro === 'Admin';
     }
 
-    // Format lương hiển thị đẹp hơn
-    public function getLuongFormattedAttribute()
+    /**
+     * Kiểm tra xem nhân viên có phải là Quản lý không
+     */
+    public function isQuanLy()
     {
-        return number_format($this->Luong, 0, ',', '.') . ' VND';
+        return $this->VaiTro === 'QuanLy';
+    }
+
+    /**
+     * Kiểm tra xem nhân viên có phải là Thu ngân không
+     */
+    public function isThuNgan()
+    {
+        return $this->VaiTro === 'ThuNgan';
+    }
+
+    /**
+     * Kiểm tra xem nhân viên có phải là Bán vé không
+     */
+    public function isBanVe()
+    {
+        return $this->VaiTro === 'BanVe';
+    }
+
+    /**
+     * Scope để lọc theo vai trò
+     */
+    public function scopeVaiTro($query, $vaiTro)
+    {
+        return $query->where('VaiTro', $vaiTro);
     }
 }

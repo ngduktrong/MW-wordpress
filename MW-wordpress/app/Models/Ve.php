@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Ve extends Model
 {
-    protected $table = 've';             // tên bảng
-    protected $primaryKey = 'MaVe';      // khóa chính
-    public $timestamps = false;          // nếu không có created_at, updated_at
+    use HasFactory;
+
+    protected $table = 'Ve';
+    protected $primaryKey = 'MaVe';
+    public $timestamps = false;
 
     protected $fillable = [
         'MaSuatChieu',
@@ -17,34 +20,61 @@ class Ve extends Model
         'MaHoaDon',
         'GiaVe',
         'TrangThai',
-        'NgayDat',
-        'NgayGioChieu'
+        'NgayDat'
     ];
 
-    // ===== Quan hệ Eloquent =====
+    protected $casts = [
+        'GiaVe' => 'decimal:2',
+        'NgayDat' => 'datetime'
+    ];
 
-    // Vé thuộc về 1 suất chiếu
+    /**
+     * Mối quan hệ với bảng SuatChieu
+     */
     public function suatChieu()
     {
         return $this->belongsTo(SuatChieu::class, 'MaSuatChieu', 'MaSuatChieu');
     }
 
-    // Vé thuộc về 1 phòng chiếu
-    public function phongChieu()
-    {
-        return $this->belongsTo(PhongChieu::class, 'MaPhong', 'MaPhong');
-    }
-
-    // Vé thuộc về 1 hóa đơn
+    /**
+     * Mối quan hệ với bảng HoaDon
+     */
     public function hoaDon()
     {
         return $this->belongsTo(HoaDon::class, 'MaHoaDon', 'MaHoaDon');
     }
 
-    // Format Ngày Giờ Chiếu
-    public function getNgayGioChieuFormattedAttribute()
+    /**
+     * Mối quan hệ với bảng Ghe (composite key)
+     */
+    public function ghe()
     {
-        if (!$this->NgayGioChieu) return '';
-        return \Carbon\Carbon::parse($this->NgayGioChieu)->format('d-m-Y H:i');
+        // Sử dụng where clause để xử lý composite key
+        return $this->hasOne(Ghe::class, 'MaPhong', 'MaPhong')
+                    ->where('SoGhe', $this->SoGhe);
+    }
+
+    /**
+     * Mối quan hệ với bảng PhongChieu
+     */
+    public function phongChieu()
+    {
+        return $this->belongsTo(PhongChieu::class, 'MaPhong', 'MaPhong');
+    }
+
+    /**
+     * Scope để lấy vé theo trạng thái
+     */
+    public function scopeTrangThai($query, $trangThai)
+    {
+        return $query->where('TrangThai', $trangThai);
+    }
+
+    /**
+     * Scope để lấy vé theo suất chiếu
+     */
+    public function scopeTheoSuatChieu($query, $maSuatChieu)
+    {
+        return $query->where('MaSuatChieu', $maSuatChieu);
     }
 }

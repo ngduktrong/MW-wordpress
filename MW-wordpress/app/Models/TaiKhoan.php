@@ -3,45 +3,76 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable; // dùng cho login/auth
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class TaiKhoan extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    protected $table = 'tai_khoan';   // tên bảng
-    protected $primaryKey = 'ten_dang_nhap'; // khóa chính
-    public $incrementing = false;     // vì không phải AUTO_INCREMENT
-    protected $keyType = 'string';    // khóa chính dạng chuỗi
-    public $timestamps = false;       // không có created_at, updated_at
+    protected $table = 'TaiKhoan';
+    protected $primaryKey = 'TenDangNhap';
+    public $incrementing = false;
+    protected $keyType = 'string';
+    public $timestamps = false;
 
     protected $fillable = [
-        'ten_dang_nhap',
-        'mat_khau',
-        'loai_tai_khoan',
-        'ma_nguoi_dung',
+        'TenDangNhap',
+        'MatKhau',
+        'LoaiTaiKhoan',
+        'MaNguoiDung'
     ];
 
     protected $hidden = [
-        'mat_khau',
+        'MatKhau',
         'remember_token',
     ];
 
-    // Constants cho loại tài khoản
-    const ADMIN = 'admin';
-    const USER = 'user';
+    protected $casts = [
+        'LoaiTaiKhoan' => 'string',
+    ];
 
-    // Mutator: đảm bảo loại tài khoản hợp lệ
-    public function setLoaiTaiKhoanAttribute($value)
+    /**
+     * Get the name of the unique identifier for the user.
+     *
+     * @return string
+     */
+    public function getAuthIdentifierName()
     {
-        $this->attributes['loai_tai_khoan'] =
-            strtolower($value) === self::ADMIN ? self::ADMIN : self::USER;
+        return 'TenDangNhap';
     }
 
-    // Quan hệ: một tài khoản thuộc về một người dùng
+    /**
+     * Get the password for the user.
+     *
+     * @return string
+     */
+    public function getAuthPassword()
+    {
+        return $this->MatKhau;
+    }
+
+    /**
+     * Mối quan hệ với bảng NguoiDung
+     */
     public function nguoiDung()
     {
-        return $this->belongsTo(NguoiDung::class, 'ma_nguoi_dung', 'ma_nguoi_dung');
+        return $this->belongsTo(NguoiDung::class, 'MaNguoiDung', 'MaNguoiDung');
+    }
+
+    /**
+     * Kiểm tra xem tài khoản có phải là admin không
+     */
+    public function isAdmin()
+    {
+        return $this->LoaiTaiKhoan === 'admin';
+    }
+
+    /**
+     * Kiểm tra xem tài khoản có phải là user không
+     */
+    public function isUser()
+    {
+        return $this->LoaiTaiKhoan === 'user';
     }
 }
