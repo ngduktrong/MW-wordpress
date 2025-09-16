@@ -12,6 +12,7 @@ class SuatChieu extends Model
     protected $table = 'SuatChieu';
     protected $primaryKey = 'MaSuatChieu';
     public $timestamps = false;
+    public $incrementing = true;
 
     protected $fillable = [
         'MaPhim',
@@ -20,6 +21,9 @@ class SuatChieu extends Model
     ];
 
     protected $casts = [
+        'MaSuatChieu' => 'integer',
+        'MaPhim' => 'integer',
+        'MaPhong' => 'integer',
         'NgayGioChieu' => 'datetime'
     ];
 

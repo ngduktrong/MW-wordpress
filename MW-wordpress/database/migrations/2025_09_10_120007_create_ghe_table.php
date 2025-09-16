@@ -6,15 +6,15 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('ghe', function (Blueprint $table) {
-            $table->unsignedBigInteger('ma_phong');
-            $table->string('so_ghe', 5);
-            $table->primary(['ma_phong', 'so_ghe']);
-            $table->foreign('ma_phong')->references('ma_phong')->on('phong_chieu')->onDelete('cascade');
+        Schema::create('Ghe', function (Blueprint $table) {
+            $table->integer('MaPhong'); // Changed to match database type
+            $table->string('SoGhe', 5); // Changed column name
+            $table->primary(['MaPhong', 'SoGhe']); // Updated primary key
+            $table->foreign('MaPhong')->references('MaPhong')->on('PhongChieu')->onDelete('cascade');
         });
     }
 
     public function down(): void {
-        Schema::dropIfExists('ghe');
+        Schema::dropIfExists('Ghe'); // Updated table name
     }
 };

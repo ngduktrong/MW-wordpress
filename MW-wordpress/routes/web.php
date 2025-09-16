@@ -4,6 +4,8 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\PhimController;
 use App\Http\Controllers\PhongChieuController;
+use App\Http\Controllers\SuatChieuController;
+use App\Http\Controllers\GheController;
 
 // Trang quản lý phim (hiển thị view AdminPhim.php)
 Route::get('/admin/phim', [PhimController::class, 'showAdminPage'])->name('admin.phim');
@@ -17,6 +19,20 @@ Route::prefix('admin')->group(function () {
     Route::put('/phongchieu/{id}', [PhongChieuController::class, 'update'])->name('admin.phongchieu.update');
     Route::delete('/phongchieu/{id}', [PhongChieuController::class, 'destroy'])->name('admin.phongchieu.destroy');
 });
+// Routes cho quản lý suất chiếu
+Route::prefix('admin')->group(function () {
+    Route::get('/suatchieu', [SuatChieuController::class, 'index'])->name('admin.suatchieu.index');
+    Route::post('/suatchieu', [SuatChieuController::class, 'store'])->name('admin.suatchieu.store');
+    Route::put('/suatchieu/{id}', [SuatChieuController::class, 'update'])->name('admin.suatchieu.update');
+    Route::delete('/suatchieu/{id}', [SuatChieuController::class, 'destroy'])->name('admin.suatchieu.destroy');
+});
+// Hiển thị danh sách + form
+Route::get('ghe', [GheController::class, 'index'])->name('ghe.index');
+Route::post('ghe', [GheController::class, 'store'])->name('ghe.store');
+Route::get('ghe/{maPhong}/{soGhe}/edit', [GheController::class, 'edit'])->name('ghe.edit');
+Route::put('ghe/{maPhong}/{soGhe}', [GheController::class, 'update'])->name('ghe.update');
+Route::delete('ghe/{maPhong}/{soGhe}', [GheController::class, 'destroy'])->name('ghe.destroy');
+
 // Route test database (giữ nguyên cho debug)
 Route::get('/test-db', function () {
     try {

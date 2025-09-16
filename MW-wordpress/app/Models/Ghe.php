@@ -11,7 +11,8 @@ class Ghe extends Model
 
     protected $table = 'Ghe';
     public $timestamps = false;
-    public $incrementing = false;
+    public $incrementing = false; // không auto-increment
+    protected $primaryKey = null; // Laravel mặc định yêu cầu 1 key, mình override lại
 
     protected $fillable = [
         'MaPhong',
@@ -28,9 +29,23 @@ class Ghe extends Model
 
     /**
      * Mối quan hệ với bảng Ve
+     * (dùng query thủ công vì Eloquent không hỗ trợ composite key natively)
      */
     public function ves()
     {
-        return $this->hasMany(Ve::class, ['MaPhong', 'SoGhe'], ['MaPhong', 'SoGhe']);
+        return Ve::where('MaPhong', $this->MaPhong)
+                 ->where('SoGhe', $this->SoGhe);
+    }
+
+    /**
+     * Override để khi update/save thì Laravel biết
+     * dùng MaPhong + SoGhe làm điều kiện
+     */
+    protected function setKeysForSaveQuery($query)
+    {
+        $query->where('MaPhong', '=', $this->MaPhong)
+              ->where('SoGhe', '=', $this->SoGhe);
+
+        return $query;
     }
 }

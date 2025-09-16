@@ -6,17 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('suat_chieu', function (Blueprint $table) {
-            $table->id('ma_suat_chieu');
-            $table->unsignedBigInteger('ma_phim');
-            $table->unsignedBigInteger('ma_phong');
-            $table->dateTime('ngay_gio_chieu');
-            $table->foreign('ma_phim')->references('ma_phim')->on('phim')->onDelete('cascade');
-            $table->foreign('ma_phong')->references('ma_phong')->on('phong_chieu')->onDelete('cascade');
+        Schema::create('SuatChieu', function (Blueprint $table) {
+            $table->integer('MaSuatChieu')->autoIncrement()->primary(); // Sửa thành integer và autoIncrement
+            $table->integer('MaPhim')->unsigned(); // Sửa thành integer
+            $table->integer('MaPhong')->unsigned(); // Sửa thành integer
+            $table->dateTime('NgayGioChieu');
+            $table->foreign('MaPhim')->references('MaPhim')->on('Phim')->onDelete('cascade');
+            $table->foreign('MaPhong')->references('MaPhong')->on('PhongChieu')->onDelete('cascade');
         });
     }
 
     public function down(): void {
-        Schema::dropIfExists('suat_chieu');
+        Schema::dropIfExists('SuatChieu'); // Sửa tên bảng thành SuatChieu
     }
 };
