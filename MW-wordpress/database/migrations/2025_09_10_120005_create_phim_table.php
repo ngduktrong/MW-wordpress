@@ -4,23 +4,31 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration {
-    public function up(): void {
-        Schema::create('phim', function (Blueprint $table) {
-            $table->id('ma_phim');
-            $table->string('ten_phim', 100);
-            $table->integer('thoi_luong')->unsigned();
-            $table->date('ngay_khoi_chieu');
-            $table->string('nuoc_san_xuat', 50);
-            $table->string('dinh_dang', 20);
-            $table->text('mo_ta')->nullable();
-            $table->string('dao_dien', 100);
-            $table->text('duong_dan_poster')->nullable();
-            $table->timestamps();
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('Phim', function (Blueprint $table) {
+            $table->increments('MaPhim'); // INT AUTO_INCREMENT PRIMARY KEY
+            $table->string('TenPhim', 100); // VARCHAR(100) NOT NULL
+            $table->integer('ThoiLuong')->unsigned(); // INT CHECK > 0
+            $table->date('NgayKhoiChieu'); // DATE NOT NULL
+            $table->string('NuocSanXuat', 50); // NVARCHAR(50)
+            $table->string('DinhDang', 20); // NVARCHAR(20)
+            $table->text('MoTa')->nullable(); // TEXT
+            $table->string('DaoDien', 100); // NVARCHAR(100)
+            $table->text('DuongDanPoster')->nullable(); // TEXT
         });
     }
 
-    public function down(): void {
-        Schema::dropIfExists('phim');
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('Phim');
     }
 };

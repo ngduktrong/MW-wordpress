@@ -6,16 +6,16 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('phong_chieu', function (Blueprint $table) {
-            $table->id('ma_phong');
-            $table->string('ten_phong', 255)->unique();
-            $table->integer('so_luong_ghe')->unsigned();
-            $table->string('loai_phong', 50);
-            $table->timestamps();
+        Schema::create('PhongChieu', function (Blueprint $table) {
+            $table->integer('MaPhong')->autoIncrement()->primary(); // Sửa thành integer và autoIncrement
+            $table->string('TenPhong', 255)->unique();
+            $table->integer('SoLuongGhe')->unsigned();
+            $table->string('LoaiPhong', 50);
+            // Loại bỏ timestamps vì không có trong database
         });
     }
 
     public function down(): void {
-        Schema::dropIfExists('phong_chieu');
+        Schema::dropIfExists('PhongChieu'); // Sửa tên bảng thành PhongChieu
     }
 };

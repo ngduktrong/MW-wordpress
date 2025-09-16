@@ -3,127 +3,51 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Validator;
 
-/**
- * BaseCrudController (cha chung - dùng cho nhiều resource)
- * - Đặt 1 file controller cha, các controller con kế thừa.
- * - Controller con chỉ cần khai báo: $modelClass, $resource, $validationRules (nếu cần)
- */
-abstract class BaseCrudController extends BaseController
+abstract class BaseCrudController extends Controller
 {
     /**
-     * Model class full name, ví dụ: \App\Models\Phim::class
-     * @var string
+     * Model class mà controller con sẽ gán, ví dụ: App\Models\Phim::class
      */
-    protected $modelClass;
+    protected $model;
 
     /**
-     * Resource name (folder view + route name), ví dụ 'phim'
-     * @var string
+     * Primary key của model (chuỗi)
      */
-    protected $resource;
+    protected $primaryKey = 'id';
 
-    /**
-     * Validation rules mặc định dùng cho store/update. Controller con override nếu cần.
-     * @var array
-     */
-    protected $validationRules = [];
-
-    public function __construct()
+    // Lấy toàn bộ dữ liệu
+    public function index()
     {
-        if (empty($this->resource) && !empty($this->modelClass)) {
-            $parts = explode('\\', $this->modelClass);
-            $this->resource = strtolower(end($parts));
-        }
+        return $this->model::all();
     }
 
-    public function index(Request $request)
-    {
-        $perPage = (int) $request->get('per_page', 15);
-        $items = ($this->modelClass)::paginate($perPage);
-
-        if ($request->wantsJson()) {
-            return response()->json($items);
-        }
-
-        return view("{$this->resource}.index", compact('items'));
-    }
-
-    public function create(Request $request)
-    {
-        if ($request->wantsJson()) {
-            return response()->json(['message' => 'send POST to store']);
-        }
-
-        return view("{$this->resource}.create");
-    }
-
+    // Thêm mới (trả về created model)
     public function store(Request $request)
     {
-        $data = $request->all();
-
-        if (!empty($this->validationRules)) {
-            $v = Validator::make($data, $this->validationRules);
-            if ($v->fails()) {
-                return redirect()->back()->withErrors($v)->withInput();
-            }
-        }
-
-        $item = ($this->modelClass)::create($data);
-
-        return redirect()->route("{$this->resource}.index")->with('success', 'Created successfully');
+        $item = $this->model::create($request->all());
+        return $item;
     }
 
-    public function show(Request $request, $id)
+    // Xem chi tiết
+    public function show($id)
     {
-        $item = ($this->modelClass)::findOrFail($id);
-
-        if ($request->wantsJson()) {
-            return response()->json($item);
-        }
-
-        return view("{$this->resource}.show", compact('item'));
+        return $this->model::findOrFail($id);
     }
 
-    public function edit(Request $request, $id)
-    {
-        $item = ($this->modelClass)::findOrFail($id);
-
-        if ($request->wantsJson()) {
-            return response()->json($item);
-        }
-
-        return view("{$this->resource}.edit", compact('item'));
-    }
-
+    // Cập nhật
     public function update(Request $request, $id)
     {
-        $data = $request->all();
-        $item = ($this->modelClass)::findOrFail($id);
-
-        if (!empty($this->validationRules)) {
-            $v = Validator::make($data, $this->validationRules);
-            if ($v->fails()) {
-                return redirect()->back()->withErrors($v)->withInput();
-            }
-        }
-
-        $item->update($data);
-
-        return redirect()->route("{$this->resource}.index")->with('success', 'Updated successfully');
+        $item = $this->model::findOrFail($id);
+        $item->update($request->all());
+        return $item;
     }
 
-    public function destroy(Request $request, $id)
+    // Xóa
+    public function destroy($id)
     {
-        $item = ($this->modelClass)::findOrFail($id);
+        $item = $this->model::findOrFail($id);
         $item->delete();
-
-        if ($request->wantsJson()) {
-            return response()->json(null, 204);
-        }
-
-        return redirect()->route("{$this->resource}.index")->with('success', 'Deleted successfully');
+        return response()->json(['message' => 'Xóa thành công']);
     }
 }

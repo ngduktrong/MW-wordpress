@@ -12,6 +12,7 @@ class PhongChieu extends Model
     protected $table = 'PhongChieu';
     protected $primaryKey = 'MaPhong';
     public $timestamps = false;
+    public $incrementing = true;
 
     protected $fillable = [
         'TenPhong',
@@ -20,6 +21,7 @@ class PhongChieu extends Model
     ];
 
     protected $casts = [
+        'MaPhong' => 'integer',
         'SoLuongGhe' => 'integer'
     ];
 
@@ -37,5 +39,13 @@ class PhongChieu extends Model
     public function suatChieus()
     {
         return $this->hasMany(SuatChieu::class, 'MaPhong', 'MaPhong');
+    }
+
+    /**
+     * Mối quan hệ với bảng Ve thông qua SuatChieu
+     */
+    public function ves()
+    {
+        return $this->hasManyThrough(Ve::class, SuatChieu::class, 'MaPhong', 'MaSuatChieu', 'MaPhong', 'MaSuatChieu');
     }
 }

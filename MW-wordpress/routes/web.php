@@ -1,12 +1,23 @@
 <?php
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
-
-
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\PhimController;
-Route::resource('phim', PhimController::class);
+use App\Http\Controllers\PhongChieuController;
 
+// Trang quản lý phim (hiển thị view AdminPhim.php)
+Route::get('/admin/phim', [PhimController::class, 'showAdminPage'])->name('admin.phim');
+
+// CRUD phim (tận dụng BaseCrudController)
+Route::resource('phim', PhimController::class);
+// Routes cho quản lý phòng chiếu
+Route::prefix('admin')->group(function () {
+    Route::get('/phongchieu', [PhongChieuController::class, 'index'])->name('admin.phongchieu.index');
+    Route::post('/phongchieu', [PhongChieuController::class, 'store'])->name('admin.phongchieu.store');
+    Route::put('/phongchieu/{id}', [PhongChieuController::class, 'update'])->name('admin.phongchieu.update');
+    Route::delete('/phongchieu/{id}', [PhongChieuController::class, 'destroy'])->name('admin.phongchieu.destroy');
+});
+// Route test database (giữ nguyên cho debug)
 Route::get('/test-db', function () {
     try {
         $connName = DB::getDefaultConnection();
@@ -14,20 +25,19 @@ Route::get('/test-db', function () {
         $driver = DB::connection()->getPdo()->getAttribute(PDO::ATTR_DRIVER_NAME);
         $now = DB::select('SELECT NOW() as now_time')[0]->now_time ?? null;
 
-        // danh sách bảng (SHOW TABLES)
         $tablesRaw = DB::select('SHOW TABLES');
         $tables = array_map(function ($t) { 
             $a = (array)$t; 
             return array_values($a)[0]; 
         }, $tablesRaw);
 
-        // show LIKE checks + information_schema (case-insensitive find)
         $likeUpper = DB::select("SHOW TABLES LIKE 'Phim'");
         $likeLower = DB::select("SHOW TABLES LIKE 'phim'");
         $info = DB::select(
             "SELECT TABLE_NAME FROM information_schema.tables WHERE table_schema = ? AND LOWER(TABLE_NAME) = ?",
             [$dbName, 'phim']
         );
+
         $phim_exists = in_array('Phim', $tables, true) ? 'yes' : 'no';
         $phim_exists_lower = in_array('phim', $tables, true) ? 'yes' : 'no';
 
