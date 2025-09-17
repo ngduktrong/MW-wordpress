@@ -18,61 +18,90 @@
 <div class="container py-4">
     <h1 class="text-center mb-4">Quản lý Ghế</h1>
 
-    <!-- Thông báo -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
             {{ session('success') }}
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
-    @if(session('error'))
+    @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show" role="alert">
-            {{ session('error') }}
+            @foreach($errors->all() as $error)
+                <div>{{ $error }}</div>
+            @endforeach
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
     @endif
 
-    <!-- Form thêm / sửa -->
     <div class="form-section">
-        <h3>{{ isset($editingGhe) ? 'Sửa Ghế' : 'Thêm Ghế' }}</h3>
-        <form method="POST"
-              action="{{ isset($editingGhe) ? route('ghe.update', [$editingGhe->MaPhong, $editingGhe->SoGhe]) : route('ghe.store') }}">
+        <h3>{{ $editingGhe ? 'Sửa Ghế' : 'Thêm Ghế' }}</h3>
+        <form method="POST" action="{{ $editingGhe ? route('ghe.update', [$editingGhe->MaPhong, $editingGhe->SoGhe]) : route('ghe.store') }}">
             @csrf
-            @if(isset($editingGhe))
-                @method('PUT')
-            @endif
+            @if($editingGhe) @method('PUT') @endif
 
             <div class="row mb-3">
                 <div class="col-md-4">
-                    <label for="MaPhong" class="form-label">Mã Phòng</label>
-                    <select class="form-select" id="MaPhong" name="MaPhong" required>
+                    <label for="MaPhong" class="form-label">Phòng</label>
+                    <select class="form-select" name="MaPhong" required {{ $editingGhe ? 'disabled' : '' }}>
                         <option value="">Chọn phòng</option>
                         @foreach($phongChieus as $phong)
-                            <option value="{{ $phong->MaPhong }}"
-                                {{ (isset($editingGhe) && $editingGhe->MaPhong == $phong->MaPhong) ? 'selected' : '' }}>
-                                {{ $phong->TenPhong }} ({{ $phong->MaPhong }})
+                            <option value="{{ $phong->MaPhong }}" {{ ($editingGhe && $editingGhe->MaPhong == $phong->MaPhong) ? 'selected' : (old('MaPhong') == $phong->MaPhong ? 'selected' : '') }}>
+                                {{ $phong->TenPhong }} ({{ $phong->SoLuongGhe }} ghế)
                             </option>
                         @endforeach
                     </select>
+                    @if($editingGhe) <input type="hidden" name="MaPhong" value="{{ $editingGhe->MaPhong }}"> @endif
                 </div>
+                
                 <div class="col-md-4">
                     <label for="SoGhe" class="form-label">Số Ghế</label>
-                    <input type="text" class="form-control" id="SoGhe" name="SoGhe"
-                           value="{{ isset($editingGhe) ? $editingGhe->SoGhe : '' }}" required>
+                    <input type="text" class="form-control" name="SoGhe" value="{{ $editingGhe ? $editingGhe->SoGhe : old('SoGhe') }}" required>
                 </div>
+                
                 <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary me-2">
-                        {{ isset($editingGhe) ? 'Cập nhật' : 'Thêm' }}
-                    </button>
-                    @if(isset($editingGhe))
+                    <button type="submit" class="btn btn-primary me-2">{{ $editingGhe ? 'Cập nhật' : 'Thêm' }}</button>
+                    @if($editingGhe)
                         <a href="{{ route('ghe.index') }}" class="btn btn-secondary">Hủy</a>
                     @endif
                 </div>
             </div>
         </form>
+
+        <hr>
+        
+        <h4>Thêm hàng loạt</h4>
+        <form method="POST" action="{{ route('ghe.store') }}">
+            @csrf
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <label class="form-label">Phòng</label>
+                    <select class="form-select" name="MaPhong" required>
+                        <option value="">Chọn phòng</option>
+                        @foreach($phongChieus as $phong)
+                            <option value="{{ $phong->MaPhong }}" {{ old('MaPhong') == $phong->MaPhong ? 'selected' : '' }}>
+                                {{ $phong->TenPhong }} ({{ $phong->SoLuongGhe }} ghế)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Số lượng</label>
+                    <input type="number" class="form-control" name="quantity" min="1" value="{{ old('quantity') }}">
+                </div>
+                
+                <div class="col-md-2">
+                    <label class="form-label">Ghế/hàng</label>
+                    <input type="number" class="form-control" name="seats_per_row" min="1" max="99" value="{{ old('seats_per_row', 10) }}">
+                </div>
+                
+                <div class="col-md-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-info" name="mode" value="bulk">Thêm hàng loạt</button>
+                </div>
+            </div>
+        </form>
     </div>
 
-    <!-- Danh sách ghế -->
     <div class="table-responsive">
         <table class="table table-striped table-bordered">
             <thead class="table-dark">
@@ -96,10 +125,8 @@
                             <i class="fas fa-edit"></i> Sửa
                         </a>
                         <form action="{{ route('ghe.destroy', [$ghe->MaPhong, $ghe->SoGhe]) }}" method="POST" class="d-inline">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit" class="btn btn-sm btn-danger"
-                                    onclick="return confirm('Bạn có chắc chắn muốn xóa ghế này?')">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Xóa ghế này?')">
                                 <i class="fas fa-trash"></i> Xóa
                             </button>
                         </form>
@@ -107,7 +134,7 @@
                 </tr>
             @empty
                 <tr>
-                    <td colspan="5" class="text-center">Không có dữ liệu ghế</td>
+                    <td colspan="5" class="text-center">Chưa có dữ liệu ghế</td>
                 </tr>
             @endforelse
             </tbody>

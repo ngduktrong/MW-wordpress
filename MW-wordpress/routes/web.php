@@ -27,12 +27,11 @@ Route::prefix('admin')->group(function () {
     Route::delete('/suatchieu/{id}', [SuatChieuController::class, 'destroy'])->name('admin.suatchieu.destroy');
 });
 // Hiển thị danh sách + form
-Route::get('ghe', [GheController::class, 'index'])->name('ghe.index');
-Route::post('ghe', [GheController::class, 'store'])->name('ghe.store');
-Route::get('ghe/{maPhong}/{soGhe}/edit', [GheController::class, 'edit'])->name('ghe.edit');
-Route::put('ghe/{maPhong}/{soGhe}', [GheController::class, 'update'])->name('ghe.update');
-Route::delete('ghe/{maPhong}/{soGhe}', [GheController::class, 'destroy'])->name('ghe.destroy');
-
+Route::get('/ghe', [GheController::class, 'index'])->name('ghe.index');
+Route::post('/ghe', [GheController::class, 'store'])->name('ghe.store');
+Route::put('/ghe/{maPhong}/{soGhe}', [GheController::class, 'update'])->name('ghe.update');
+Route::delete('/ghe/{maPhong}/{soGhe}', [GheController::class, 'destroy'])->name('ghe.destroy');
+Route::get('/ghe/edit/{maPhong}/{soGhe}', [GheController::class, 'edit'])->name('ghe.edit');
 // Route test database (giữ nguyên cho debug)
 Route::get('/test-db', function () {
     try {
