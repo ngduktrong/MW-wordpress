@@ -27,6 +27,7 @@ Route::prefix('admin')->group(function () {
     Route::delete('/suatchieu/{id}', [SuatChieuController::class, 'destroy'])->name('admin.suatchieu.destroy');
 });
 // Hiển thị danh sách + form
+// Hiển thị danh sách + form
 Route::get('/ghe', [GheController::class, 'index'])->name('ghe.index');
 Route::post('/ghe', [GheController::class, 'store'])->name('ghe.store');
 Route::put('/ghe/{maPhong}/{soGhe}', [GheController::class, 'update'])->name('ghe.update');

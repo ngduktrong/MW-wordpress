@@ -37,7 +37,11 @@
         <h3>{{ $editingGhe ? 'Sửa Ghế' : 'Thêm Ghế' }}</h3>
         <form method="POST" action="{{ $editingGhe ? route('ghe.update', [$editingGhe->MaPhong, $editingGhe->SoGhe]) : route('ghe.store') }}">
             @csrf
-            @if($editingGhe) @method('PUT') @endif
+            @if($editingGhe)
+                @method('PUT')
+            @else
+                <input type="hidden" name="mode" value="single">
+            @endif
 
             <div class="row mb-3">
                 <div class="col-md-4">

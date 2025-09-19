@@ -14,14 +14,13 @@ class GheController extends BaseCrudController
     public function index()
     {
         $phongChieus = PhongChieu::orderBy('MaPhong')->get();
-        // eager load phongChieu to avoid N+1 when blade accesses $ghe->phongChieu
         $ghes = Ghe::with('phongChieu')->orderBy('MaPhong')->orderBy('SoGhe')->get();
-        
+
         $editingGhe = null;
         if (request()->has('edit_ma_phong') && request()->has('edit_so_ghe')) {
             $editingGhe = Ghe::where('MaPhong', request()->query('edit_ma_phong'))
-                             ->where('SoGhe', request()->query('edit_so_ghe'))
-                             ->first();
+                            ->where('SoGhe', request()->query('edit_so_ghe'))
+                            ->first();
         }
 
         return view('AdminGhe', compact('phongChieus', 'ghes', 'editingGhe'));
@@ -32,22 +31,29 @@ class GheController extends BaseCrudController
         $request->validate([
             'MaPhong' => 'required|integer|exists:PhongChieu,MaPhong',
             'mode' => 'required|in:single,bulk',
-            'SoGhe' => 'nullable|string|max:10',
-            'quantity' => 'nullable|integer|min:1',
-            'seats_per_row' => 'nullable|integer|min:1|max:99',
         ]);
 
         $maPhong = $request->input('MaPhong');
         $mode = $request->input('mode');
-        $phong = PhongChieu::findOrFail($maPhong);
-        $maxSeats = (int)$phong->SoLuongGhe;
+        $phong = PhongChieu::find($maPhong);
 
-        return DB::transaction(function() use ($request, $maPhong, $mode, $maxSeats) {
-            $currentCount = Ghe::where('MaPhong', $maPhong)->count();
-
+        return DB::transaction(function() use ($request, $maPhong, $mode, $phong) {
+            // Kiểm tra số ghế hiện tại
+            $soGheHienTai = Ghe::where('MaPhong', $maPhong)->count();
+            
             if ($mode === 'single') {
+                // VALIDATION MỚI: Kiểm tra không vượt quá số lượng ghế cho phép
+                if ($soGheHienTai >= $phong->SoLuongGhe) {
+                    return back()->withErrors(['MaPhong' => 'Phòng đã đạt số lượng ghế tối đa ('.$phong->SoLuongGhe.')'])->withInput();
+                }
+
+                $request->validate([
+                    'SoGhe' => 'required|string|max:10',
+                ]);
+
                 $soGhe = strtoupper(trim($request->input('SoGhe')));
-                if (empty($soGhe)) {
+
+                if (!$soGhe) {
                     return back()->withErrors(['SoGhe' => 'Vui lòng nhập mã ghế'])->withInput();
                 }
 
@@ -55,116 +61,148 @@ class GheController extends BaseCrudController
                     return back()->withErrors(['SoGhe' => "Ghế $soGhe đã tồn tại"])->withInput();
                 }
 
-                if ($currentCount + 1 > $maxSeats) {
-                    return back()->withErrors(['MaPhong' => 'Vượt quá số ghế tối đa của phòng'])->withInput();
-                }
-
                 Ghe::create(['MaPhong' => $maPhong, 'SoGhe' => $soGhe]);
 
-                return redirect()->route('ghe.index')->with('success', 'Thêm ghế thành công');
+                return redirect()->route('ghe.index')->with('success', "Thêm ghế $soGhe thành công");
             }
 
             // bulk mode
-            $quantity = (int)$request->input('quantity', 0);
-            $seats_per_row = (int)$request->input('seats_per_row', 10);
-            if ($quantity < 1) {
-                return back()->withErrors(['quantity' => 'Vui lòng nhập số lượng hợp lệ'])->withInput();
+            // VALIDATION MỚI: Kiểm tra số lượng ghế muốn thêm
+            $request->validate([
+                'quantity' => 'required|integer|min:1',
+                'seats_per_row' => 'nullable|integer|min:1',
+            ]);
+
+            $quantity = (int) $request->input('quantity', 0);
+            $seatsPerRow = (int) $request->input('seats_per_row', 10);
+            if ($seatsPerRow <= 0) $seatsPerRow = 10;
+            
+            // Kiểm tra xem có đủ chỗ để thêm số ghế yêu cầu không
+            $soGheConLai = $phong->SoLuongGhe - $soGheHienTai;
+            if ($quantity > $soGheConLai) {
+                return back()->withErrors(['quantity' => 'Chỉ còn '.$soGheConLai.' ghế trống trong phòng này'])->withInput();
             }
 
-            if ($currentCount + $quantity > $maxSeats) {
-                return back()->withErrors(['MaPhong' => 'Vượt quá số ghế tối đa của phòng'])->withInput();
-            }
-
-            // Generate seat codes in format A1, A2, ... (simple generator)
-            $letters = range('A', 'Z');
-            $rowsNeeded = (int)ceil($quantity / $seats_per_row);
             $created = 0;
+            $skipped = 0;
 
-            for ($r = 0; $r < $rowsNeeded && $created < $quantity; $r++) {
-                $rowLetter = $letters[$r % count($letters)];
-                for ($c = 1; $c <= $seats_per_row && $created < $quantity; $c++) {
-                    $seatCode = $rowLetter . $c;
-                    if (Ghe::where('MaPhong', $maPhong)->where('SoGhe', $seatCode)->exists()) {
-                        continue;
-                    }
+            $getRowLabel = function($index) {
+                $label = '';
+                $n = $index;
+                while ($n >= 0) {
+                    $label = chr(65 + ($n % 26)) . $label;
+                    $n = intval($n / 26) - 1;
+                }
+                return $label;
+            };
+
+            $rowIndex = 0;
+            $seatNum = 1;
+
+            while ($created < $quantity && $created < $soGheConLai) {
+                $rowLabel = $getRowLabel($rowIndex);
+                $seatCode = $rowLabel . $seatNum;
+
+                if (Ghe::where('MaPhong', $maPhong)->where('SoGhe', $seatCode)->exists()) {
+                    $skipped++;
+                } else {
                     Ghe::create(['MaPhong' => $maPhong, 'SoGhe' => $seatCode]);
                     $created++;
                 }
+
+                $seatNum++;
+                if ($seatNum > $seatsPerRow) {
+                    $seatNum = 1;
+                    $rowIndex++;
+                }
+
+                if ($rowIndex > 10000) break;
             }
 
-            return redirect()->route('ghe.index')->with('success', 'Thêm nhiều ghế thành công');
+            $msg = "Thêm hàng loạt hoàn tất. Tạo: $created; Bỏ qua (trùng): $skipped.";
+            return redirect()->route('ghe.index')->with('success', $msg);
         });
     }
 
-    /**
-     * Update: signature matches BaseCrudController::update(Request $request, $id)
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, $maPhongOrId, $soGhe = null)
     {
-        $request->validate(['SoGhe' => 'required|string|max:10']);
-
-        $maPhong = $request->route('maPhong') ?? null;
-        $soGhe = $request->route('soGhe') ?? null;
-        if (is_null($maPhong) || is_null($soGhe)) {
-            if (!is_null($id) && is_string($id)) {
-                foreach (['|', '-', ':', ','] as $sep) {
-                    if (strpos($id, $sep) !== false) {
-                        list($maPhong, $soGhe) = explode($sep, $id, 2);
-                        break;
-                    }
-                }
+        if ($soGhe === null) {
+            // Handle single parameter case with delimiter
+            $params = explode('|', $maPhongOrId);
+            if (count($params) !== 2) {
+                return back()->withErrors(['error' => 'Định dạng tham số không hợp lệ'])->withInput();
             }
+            list($maPhong, $soGhe) = $params;
+        } else {
+            $maPhong = $maPhongOrId;
         }
 
-        if (isset($maPhong)) $maPhong = trim($maPhong);
-        if (isset($soGhe)) $soGhe = trim($soGhe);
+        $request->validate([
+            'SoGhe' => 'required|string|max:10',
+        ]);
 
-        if (empty($maPhong) || empty($soGhe)) {
+        $maPhong = trim($maPhong);
+        $soGhe = trim($soGhe);
+        $newSoGhe = strtoupper(trim($request->input('SoGhe')));
+
+        if (!$maPhong || !$soGhe) {
             return back()->withErrors(['error' => 'Thiếu khóa MaPhong hoặc SoGhe'])->withInput();
         }
 
-        $newSoGhe = strtoupper(trim($request->input('SoGhe')));
+        if ($newSoGhe === $soGhe) {
+            return redirect()->route('ghe.index')->with('success', 'Không thay đổi mã ghế');
+        }
 
-        if (Ghe::where('MaPhong', $maPhong)->where('SoGhe', $newSoGhe)->exists()) {
+        $exists = Ghe::where('MaPhong', $maPhong)
+                     ->where('SoGhe', $newSoGhe)
+                     ->exists();
+
+        if ($exists) {
             return back()->withErrors(['SoGhe' => 'Mã ghế đã tồn tại'])->withInput();
         }
 
-        DB::transaction(function () use ($maPhong, $soGhe, $newSoGhe) {
-            Ghe::where('MaPhong', $maPhong)->where('SoGhe', $soGhe)->delete();
-            Ghe::create(['MaPhong' => $maPhong, 'SoGhe' => $newSoGhe]);
-        });
+        // Use query builder instead of Eloquent for update
+        $updated = DB::table('Ghe')
+            ->where('MaPhong', $maPhong)
+            ->where('SoGhe', $soGhe)
+            ->update(['SoGhe' => $newSoGhe]);
+
+        if (!$updated) {
+            return back()->withErrors(['error' => 'Ghế không tồn tại'])->withInput();
+        }
 
         return redirect()->route('ghe.index')->with('success', 'Cập nhật ghế thành công');
     }
 
-    /**
-     * Destroy: signature matches BaseCrudController::destroy($id)
-     */
-    public function destroy($id)
+    public function destroy($maPhongOrId, $soGhe = null)
     {
-        $maPhong = request()->route('maPhong') ?? null;
-        $soGhe = request()->route('soGhe') ?? null;
-        if (is_null($maPhong) || is_null($soGhe)) {
-            if (!is_null($id) && is_string($id)) {
-                foreach (['|', '-', ':', ','] as $sep) {
-                    if (strpos($id, $sep) !== false) {
-                        list($maPhong, $soGhe) = explode($sep, $id, 2);
-                        break;
-                    }
-                }
+        if ($soGhe === null) {
+            // Handle single parameter case with delimiter
+            $params = explode('|', $maPhongOrId);
+            if (count($params) !== 2) {
+                return redirect()->route('ghe.index')->withErrors(['error' => 'Định dạng tham số không hợp lệ']);
             }
+            list($maPhong, $soGhe) = $params;
+        } else {
+            $maPhong = $maPhongOrId;
         }
-        if (isset($maPhong)) $maPhong = trim($maPhong);
-        if (isset($soGhe)) $soGhe = trim($soGhe);
 
-        $ghe = Ghe::where('MaPhong', $maPhong)->where('SoGhe', $soGhe)->firstOrFail();
-        $ghe->delete();
+        $maPhong = trim($maPhong);
+        $soGhe = trim($soGhe);
+
+        // Use query builder instead of Eloquent for delete
+        $deleted = DB::table('Ghe')
+            ->where('MaPhong', $maPhong)
+            ->where('SoGhe', $soGhe)
+            ->delete();
+
+        if (!$deleted) {
+            return redirect()->route('ghe.index')->withErrors(['error' => 'Ghế không tồn tại']);
+        }
+
         return redirect()->route('ghe.index')->with('success', 'Xóa ghế thành công');
     }
 
-    /**
-     * Edit: since we're keeping all interactions on one page, redirect to index with query params
-     */
     public function edit($maPhong, $soGhe)
     {
         return redirect()->route('ghe.index', [

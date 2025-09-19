@@ -11,8 +11,8 @@ class Ghe extends Model
 
     protected $table = 'Ghe';
     public $timestamps = false;
-    public $incrementing = false; // không auto-increment
-    protected $primaryKey = null; // Laravel mặc định yêu cầu 1 key, mình override lại
+    public $incrementing = false;
+    protected $primaryKey = ['MaPhong', 'SoGhe'];
 
     protected $fillable = [
         'MaPhong',
@@ -41,11 +41,13 @@ class Ghe extends Model
      * Override để khi update/save thì Laravel biết
      * dùng MaPhong + SoGhe làm điều kiện
      */
+    // Add this method to handle composite keys for update:
     protected function setKeysForSaveQuery($query)
     {
-        $query->where('MaPhong', '=', $this->MaPhong)
-              ->where('SoGhe', '=', $this->SoGhe);
-
-        return $query;
+    return $query->where([
+        'MaPhong' => $this->getAttribute('MaPhong'),
+        'SoGhe' => $this->getOriginal('SoGhe') // Use original value for where clause
+    ]);
     }
+    
 }
