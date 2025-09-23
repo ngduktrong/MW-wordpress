@@ -6,6 +6,7 @@ use App\Http\Controllers\PhimController;
 use App\Http\Controllers\PhongChieuController;
 use App\Http\Controllers\SuatChieuController;
 use App\Http\Controllers\GheController;
+use App\Http\Controllers\NguoiDungController;
 
 // Trang quản lý phim (hiển thị view AdminPhim.php)
 Route::get('/admin/phim', [PhimController::class, 'showAdminPage'])->name('admin.phim');
@@ -33,6 +34,16 @@ Route::post('/ghe', [GheController::class, 'store'])->name('ghe.store');
 Route::put('/ghe/{maPhong}/{soGhe}', [GheController::class, 'update'])->name('ghe.update');
 Route::delete('/ghe/{maPhong}/{soGhe}', [GheController::class, 'destroy'])->name('ghe.destroy');
 Route::get('/ghe/edit/{maPhong}/{soGhe}', [GheController::class, 'edit'])->name('ghe.edit');
+
+Route::prefix('admin')->group(function () {
+    Route::get('/nguoidung', [NguoiDungController::class, 'adminIndex'])->name('admin.nguoidung.index');
+    Route::get('/nguoidung/create', [NguoiDungController::class, 'create'])->name('admin.nguoidung.create'); // thêm
+    Route::post('/nguoidung', [NguoiDungController::class, 'store'])->name('admin.nguoidung.store');
+    Route::get('/nguoidung/{id}/edit', [NguoiDungController::class, 'edit'])->name('admin.nguoidung.edit');
+    Route::put('/nguoidung/{id}', [NguoiDungController::class, 'update'])->name('admin.nguoidung.update');
+    Route::delete('/nguoidung/{id}', [NguoiDungController::class, 'destroy'])->name('admin.nguoidung.destroy');
+});
+
 // Route test database (giữ nguyên cho debug)
 Route::get('/test-db', function () {
     try {

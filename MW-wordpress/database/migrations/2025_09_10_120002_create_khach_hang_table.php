@@ -6,14 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('khach_hang', function (Blueprint $table) {
-            $table->unsignedBigInteger('ma_nguoi_dung')->primary();
-            $table->integer('diem_tich_luy')->default(0);
-            $table->foreign('ma_nguoi_dung')->references('ma_nguoi_dung')->on('nguoi_dung')->onDelete('cascade');
-        });
+        // Chỉ tạo bảng nếu chưa tồn tại
+        if (!Schema::hasTable('KhachHang')) {
+            Schema::create('KhachHang', function (Blueprint $table) {
+                $table->unsignedBigInteger('MaNguoiDung')->primary();
+                $table->integer('DiemTichLuy')->default(0);
+
+                $table->foreign('MaNguoiDung')
+                      ->references('MaNguoiDung')->on('NguoiDung')
+                      ->onDelete('cascade');
+            });
+        }
     }
 
     public function down(): void {
-        Schema::dropIfExists('khach_hang');
+        Schema::dropIfExists('KhachHang');
     }
 };

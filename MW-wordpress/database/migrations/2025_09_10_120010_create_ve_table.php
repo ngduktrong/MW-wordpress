@@ -6,24 +6,37 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration {
     public function up(): void {
-        Schema::create('ve', function (Blueprint $table) {
-            $table->id('ma_ve');
-            $table->unsignedBigInteger('ma_suat_chieu');
-            $table->unsignedBigInteger('ma_phong');
-            $table->string('so_ghe', 5);
-            $table->unsignedBigInteger('ma_hoa_don')->nullable();
-            $table->decimal('gia_ve', 10, 2)->unsigned();
-            $table->enum('trang_thai', ['available', 'booked', 'paid', 'cancelled', 'pending'])->default('available');
-            $table->dateTime('ngay_dat')->nullable();
+        if (!Schema::hasTable('Ve')) {
+            Schema::create('Ve', function (Blueprint $table) {
+                $table->id('MaVe');
+                $table->unsignedInteger('MaSuatChieu'); // khớp với SuatChieu
+                $table->integer('MaPhong'); // khớp với PhongChieu
+                $table->string('SoGhe', 5);
+                $table->unsignedBigInteger('MaHoaDon')->nullable();
+                $table->decimal('GiaVe', 10, 2)->unsigned();
+                $table->enum('TrangThai', ['available', 'booked', 'paid', 'cancelled', 'pending'])->default('available');
+                $table->dateTime('NgayDat')->nullable();
 
-            $table->foreign('ma_suat_chieu')->references('ma_suat_chieu')->on('suat_chieu')->onDelete('cascade');
-            $table->foreign('ma_hoa_don')->references('ma_hoa_don')->on('hoa_don')->onDelete('set null');
-            $table->foreign(['ma_phong', 'so_ghe'])->references(['ma_phong', 'so_ghe'])->on('ghe')->onDelete('cascade');
-            $table->unique(['ma_suat_chieu', 'so_ghe']);
-        });
+                // FK
+                $table->foreign('MaSuatChieu')
+                      ->references('MaSuatChieu')->on('SuatChieu')
+                      ->onDelete('cascade');
+
+                $table->foreign('MaHoaDon')
+                      ->references('MaHoaDon')->on('HoaDon')
+                      ->onDelete('set null');
+
+                $table->foreign(['MaPhong', 'SoGhe'])
+                      ->references(['MaPhong', 'SoGhe'])->on('Ghe')
+                      ->onDelete('cascade');
+
+                // Mỗi suất chiếu không thể trùng ghế
+                $table->unique(['MaSuatChieu', 'SoGhe']);
+            });
+        }
     }
 
     public function down(): void {
-        Schema::dropIfExists('ve');
+        Schema::dropIfExists('Ve');
     }
 };

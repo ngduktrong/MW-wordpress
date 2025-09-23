@@ -4,15 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class NguoiDung extends Model
 {
     use HasFactory;
 
+    // Tên bảng trong database
     protected $table = 'NguoiDung';
-    protected $primaryKey = 'MaNguoiDung';
-    public $timestamps = false;
 
+    // Khóa chính của bảng
+    protected $primaryKey = 'MaNguoiDung';
+
+    // Các trường có thể gán giá trị
     protected $fillable = [
         'HoTen',
         'SoDienThoai',
@@ -20,42 +24,58 @@ class NguoiDung extends Model
         'LoaiNguoiDung'
     ];
 
+    // Tự động quản lý timestamps
+    public $timestamps = true;
+
+    // Định dạng kiểu dữ liệu cho các thuộc tính
+    protected $casts = [
+        'LoaiNguoiDung' => 'string',
+    ];
+
     /**
-     * Mối quan hệ với bảng KhachHang
+     * Quan hệ 1-1 với bảng KhachHang
      */
-    public function khachHang()
+    public function khachHang(): HasOne
     {
         return $this->hasOne(KhachHang::class, 'MaNguoiDung', 'MaNguoiDung');
     }
 
     /**
-     * Mối quan hệ với bảng NhanVien
+     * Quan hệ 1-1 với bảng NhanVien
      */
-    public function nhanVien()
+    public function nhanVien(): HasOne
     {
         return $this->hasOne(NhanVien::class, 'MaNguoiDung', 'MaNguoiDung');
     }
 
     /**
-     * Mối quan hệ với bảng TaiKhoan
+     * Quan hệ 1-1 với bảng TaiKhoan
      */
-    public function taiKhoan()
+    public function taiKhoan(): HasOne
     {
         return $this->hasOne(TaiKhoan::class, 'MaNguoiDung', 'MaNguoiDung');
     }
 
     /**
-     * Mối quan hệ với bảng HoaDon (qua khách hàng)
+     * Scope để lấy khách hàng
      */
-    public function hoaDons()
+    public function scopeKhachHang($query)
     {
-        return $this->hasMany(HoaDon::class, 'MaKhachHang', 'MaNguoiDung');
+        return $query->where('LoaiNguoiDung', 'KhachHang');
+    }
+
+    /**
+     * Scope để lấy nhân viên
+     */
+    public function scopeNhanVien($query)
+    {
+        return $query->where('LoaiNguoiDung', 'NhanVien');
     }
 
     /**
      * Kiểm tra xem người dùng có phải là khách hàng không
      */
-    public function isKhachHang()
+    public function isKhachHang(): bool
     {
         return $this->LoaiNguoiDung === 'KhachHang';
     }
@@ -63,32 +83,16 @@ class NguoiDung extends Model
     /**
      * Kiểm tra xem người dùng có phải là nhân viên không
      */
-    public function isNhanVien()
+    public function isNhanVien(): bool
     {
         return $this->LoaiNguoiDung === 'NhanVien';
     }
 
     /**
-     * Scope để lọc theo loại người dùng
+     * Accessor cho tên đầy đủ (viết hoa chữ cái đầu)
      */
-    public function scopeLoaiNguoiDung($query, $loai)
+    public function getHoTenFormattedAttribute(): string
     {
-        return $query->where('LoaiNguoiDung', $loai);
-    }
-
-    /**
-     * Scope để tìm kiếm theo số điện thoại
-     */
-    public function scopeSoDienThoai($query, $soDienThoai)
-    {
-        return $query->where('SoDienThoai', $soDienThoai);
-    }
-
-    /**
-     * Scope để tìm kiếm theo email
-     */
-    public function scopeEmail($query, $email)
-    {
-        return $query->where('Email', $email);
+        return mb_convert_case($this->HoTen, MB_CASE_TITLE, "UTF-8");
     }
 }
