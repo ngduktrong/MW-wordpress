@@ -7,6 +7,7 @@ use App\Http\Controllers\PhongChieuController;
 use App\Http\Controllers\SuatChieuController;
 use App\Http\Controllers\GheController;
 use App\Http\Controllers\NguoiDungController;
+use App\Http\Controllers\TaiKhoanController;
 
 // Trang quản lý phim (hiển thị view AdminPhim.php)
 Route::get('/admin/phim', [PhimController::class, 'showAdminPage'])->name('admin.phim');
@@ -42,6 +43,14 @@ Route::prefix('admin')->group(function () {
     Route::get('/nguoidung/{id}/edit', [NguoiDungController::class, 'edit'])->name('admin.nguoidung.edit');
     Route::put('/nguoidung/{id}', [NguoiDungController::class, 'update'])->name('admin.nguoidung.update');
     Route::delete('/nguoidung/{id}', [NguoiDungController::class, 'destroy'])->name('admin.nguoidung.destroy');
+});
+Route::prefix('admin')->group(function() {
+    Route::get('/taikhoan', [TaiKhoanController::class, 'adminIndex'])->name('admin.taikhoan.index');
+    Route::post('/taikhoan', [TaiKhoanController::class, 'store'])->name('admin.taikhoan.store');
+    Route::get('/taikhoan/{id}/edit', [TaiKhoanController::class, 'getTaiKhoan'])->name('admin.taikhoan.edit');
+    Route::put('/taikhoan/{id}', [TaiKhoanController::class, 'update'])->name('admin.taikhoan.update');
+    Route::delete('/taikhoan/{id}', [TaiKhoanController::class, 'destroy'])->name('admin.taikhoan.destroy');
+    Route::get('/taikhoan/check-manguoidung/{maNguoiDung}', [TaiKhoanController::class, 'checkMaNguoiDung'])->name('admin.taikhoan.checkMaNguoiDung');
 });
 
 // Route test database (giữ nguyên cho debug)

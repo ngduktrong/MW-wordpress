@@ -2,38 +2,51 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
 class TaiKhoan extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use Notifiable;
 
+    /**
+     * Table name
+     */
     protected $table = 'TaiKhoan';
+
+    /**
+     * Primary key is TenDangNhap (string, not auto-increment)
+     */
     protected $primaryKey = 'TenDangNhap';
     public $incrementing = false;
     protected $keyType = 'string';
 
+    /**
+     * Migration của bạn không có created_at/updated_at
+     */
+    public $timestamps = false;
+
+    /**
+     * Fillable fields
+     */
     protected $fillable = [
         'TenDangNhap',
         'MatKhau',
         'LoaiTaiKhoan',
-        'MaNguoiDung'
-    ];
-
-    protected $hidden = [
-        'MatKhau',
-        'remember_token',
-    ];
-
-    protected $casts = [
-        'email_verified_at' => 'datetime',
+        'MaNguoiDung',
     ];
 
     /**
-     * Get the password for the user.
+     * Hide password when serializing to array/json
+     */
+    protected $hidden = [
+        'MatKhau',
+    ];
+
+    /**
+     * Nếu bạn dùng Auth::attempt() và cột mật khẩu là MatKhau,
+     * override getAuthPassword để Laravel biết dùng cột nào:
      */
     public function getAuthPassword()
     {
@@ -41,87 +54,25 @@ class TaiKhoan extends Authenticatable
     }
 
     /**
-     * Quan hệ với bảng NguoiDung
+     * Mutator: khi set MatKhau, tự động hash nếu cần
+     * Lưu ý: nếu đã là hash (Hash::needsRehash == false) thì giữ nguyên,
+     * nếu truyền rỗng/null thì bỏ qua.
+     */
+    public function setMatKhauAttribute($value)
+    {
+        if ($value === null || $value === '') {
+            return;
+        }
+
+        // nếu là mật khẩu plain text, hash nó; nếu đã hash, giữ nguyên
+        $this->attributes['MatKhau'] = Hash::needsRehash($value) ? Hash::make($value) : $value;
+    }
+
+    /**
+     * Relation tới bảng NguoiDung (nếu cần)
      */
     public function nguoiDung()
     {
         return $this->belongsTo(NguoiDung::class, 'MaNguoiDung', 'MaNguoiDung');
-    }
-
-    /**
-     * Kiểm tra xem tài khoản có phải là admin không
-     */
-    public function isAdmin()
-    {
-        return $this->LoaiTaiKhoan === 'admin';
-    }
-
-    /**
-     * Kiểm tra xem tài khoản có phải là user thông thường không
-     */
-    public function isUser()
-    {
-        return $this->LoaiTaiKhoan === 'user';
-    }
-
-    /**
-     * Scope để lấy tài khoản admin
-     */
-    public function scopeAdmin($query)
-    {
-        return $query->where('LoaiTaiKhoan', 'admin');
-    }
-
-    /**
-     * Scope để lấy tài khoản user
-     */
-    public function scopeUser($query)
-    {
-        return $query->where('LoaiTaiKhoan', 'user');
-    }
-
-    /**
-     * Quan hệ với bảng NhanVien thông qua NguoiDung (nếu là nhân viên)
-     */
-    public function nhanVien()
-    {
-        return $this->hasOneThrough(
-            NhanVien::class,
-            NguoiDung::class,
-            'MaNguoiDung', // Khóa ngoại trên bảng NguoiDung
-            'MaNguoiDung', // Khóa ngoại trên bảng NhanVien
-            'MaNguoiDung', // Khóa chính trên bảng TaiKhoan
-            'MaNguoiDung'  // Khóa chính trên bảng NguoiDung
-        );
-    }
-
-    /**
-     * Quan hệ với bảng KhachHang thông qua NguoiDung (nếu là khách hàng)
-     */
-    public function khachHang()
-    {
-        return $this->hasOneThrough(
-            KhachHang::class,
-            NguoiDung::class,
-            'MaNguoiDung', // Khóa ngoại trên bảng NguoiDung
-            'MaNguoiDung', // Khóa ngoại trên bảng KhachHang
-            'MaNguoiDung', // Khóa chính trên bảng TaiKhoan
-            'MaNguoiDung'  // Khóa chính trên bảng NguoiDung
-        );
-    }
-
-    /**
-     * Lấy thông tin hóa đơn của khách hàng (nếu có)
-     */
-    public function hoaDon()
-    {
-        return $this->hasManyThrough(
-            HoaDon::class,
-            NguoiDung::class,
-            'MaNguoiDung', // Khóa ngoại trên bảng NguoiDung
-            'MaKhachHang', // Khóa ngoại trên bảng HoaDon
-            'MaNguoiDung', // Khóa chính trên bảng TaiKhoan
-            'MaNguoiDung'  // Khóa chính trên bảng NguoiDung
-        );
     }
 }
