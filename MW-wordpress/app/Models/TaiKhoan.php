@@ -2,34 +2,18 @@
 
 namespace App\Models;
 
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Database\Eloquent\Model;
 
-class TaiKhoan extends Authenticatable
+class TaiKhoan extends Model
 {
-    use Notifiable;
-
-    /**
-     * Table name
-     */
     protected $table = 'TaiKhoan';
 
-    /**
-     * Primary key is TenDangNhap (string, not auto-increment)
-     */
+    // primary key là TenDangNhap (string)
     protected $primaryKey = 'TenDangNhap';
     public $incrementing = false;
     protected $keyType = 'string';
 
-    /**
-     * Migration của bạn không có created_at/updated_at
-     */
-    public $timestamps = false;
-
-    /**
-     * Fillable fields
-     */
+    // fillable fields
     protected $fillable = [
         'TenDangNhap',
         'MatKhau',
@@ -37,42 +21,41 @@ class TaiKhoan extends Authenticatable
         'MaNguoiDung',
     ];
 
-    /**
-     * Hide password when serializing to array/json
-     */
-    protected $hidden = [
-        'MatKhau',
-    ];
+    // set timestamps true since migration added timestamps
+    public $timestamps = true;
+
+    // BỎ ẨN MẬT KHẨU để hiển thị trong admin (chỉ dùng cho mục đích quản trị)
+    // protected $hidden = [
+    //     'MatKhau',
+    // ];
 
     /**
-     * Nếu bạn dùng Auth::attempt() và cột mật khẩu là MatKhau,
-     * override getAuthPassword để Laravel biết dùng cột nào:
-     */
-    public function getAuthPassword()
-    {
-        return $this->MatKhau;
-    }
-
-    /**
-     * Mutator: khi set MatKhau, tự động hash nếu cần
-     * Lưu ý: nếu đã là hash (Hash::needsRehash == false) thì giữ nguyên,
-     * nếu truyền rỗng/null thì bỏ qua.
-     */
-    public function setMatKhauAttribute($value)
-    {
-        if ($value === null || $value === '') {
-            return;
-        }
-
-        // nếu là mật khẩu plain text, hash nó; nếu đã hash, giữ nguyên
-        $this->attributes['MatKhau'] = Hash::needsRehash($value) ? Hash::make($value) : $value;
-    }
-
-    /**
-     * Relation tới bảng NguoiDung (nếu cần)
+     * Relation to NguoiDung (assuming model App\Models\NguoiDung with PK MaNguoiDung)
      */
     public function nguoiDung()
     {
         return $this->belongsTo(NguoiDung::class, 'MaNguoiDung', 'MaNguoiDung');
+    }
+
+    /**
+     * Mutator: LƯU MẬT KHẨU DẠNG VĂN BẢN THÔNG THƯỜNG (theo yêu cầu)
+     * CẢNH BÁO: Đây chỉ nên dùng cho mục đích demo/quản trị nội bộ
+     */
+    public function setMatKhauAttribute($value)
+    {
+        if (empty($value)) {
+            return;
+        }
+        
+        // Lưu mật khẩu dạng văn bản thường (không hash)
+        $this->attributes['MatKhau'] = $value;
+    }
+
+    /**
+     * Accessor: Trả về mật khẩu dạng văn bản
+     */
+    public function getMatKhauAttribute($value)
+    {
+        return $value; // Trả về trực tiếp (không mã hóa)
     }
 }

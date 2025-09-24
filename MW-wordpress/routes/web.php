@@ -44,13 +44,14 @@ Route::prefix('admin')->group(function () {
     Route::put('/nguoidung/{id}', [NguoiDungController::class, 'update'])->name('admin.nguoidung.update');
     Route::delete('/nguoidung/{id}', [NguoiDungController::class, 'destroy'])->name('admin.nguoidung.destroy');
 });
-Route::prefix('admin')->group(function() {
+// TaiKhoan Routes
+Route::prefix('admin')->group(function () {
     Route::get('/taikhoan', [TaiKhoanController::class, 'adminIndex'])->name('admin.taikhoan.index');
     Route::post('/taikhoan', [TaiKhoanController::class, 'store'])->name('admin.taikhoan.store');
-    Route::get('/taikhoan/{id}/edit', [TaiKhoanController::class, 'getTaiKhoan'])->name('admin.taikhoan.edit');
+    Route::get('/taikhoan/{id}/edit', [TaiKhoanController::class, 'edit'])->name('admin.taikhoan.edit');
     Route::put('/taikhoan/{id}', [TaiKhoanController::class, 'update'])->name('admin.taikhoan.update');
     Route::delete('/taikhoan/{id}', [TaiKhoanController::class, 'destroy'])->name('admin.taikhoan.destroy');
-    Route::get('/taikhoan/check-manguoidung/{maNguoiDung}', [TaiKhoanController::class, 'checkMaNguoiDung'])->name('admin.taikhoan.checkMaNguoiDung');
+    Route::get('/taikhoan/users/without-accounts', [TaiKhoanController::class, 'getUsersWithoutAccounts'])->name('admin.taikhoan.users.without.accounts');
 });
 
 // Route test database (giữ nguyên cho debug)
