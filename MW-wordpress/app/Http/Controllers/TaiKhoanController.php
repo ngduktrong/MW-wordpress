@@ -5,116 +5,165 @@ namespace App\Http\Controllers;
 use App\Models\TaiKhoan;
 use App\Models\NguoiDung;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
 
-class TaiKhoanController extends BaseCrudController
+class TaiKhoanController extends Controller
 {
-    protected $model = TaiKhoan::class;
-    protected $primaryKey = 'TenDangNhap';
-
-    /**
-     * Display admin page with accounts
-     */
-    public function adminIndex()
+    // Hiển thị trang quản trị (list + form)
+    public function adminIndex(Request $request)
     {
-        $taiKhoans = TaiKhoan::with('nguoiDung')->orderBy('created_at', 'desc')->paginate(15);
-        return view('AdminTaiKhoan', compact('taiKhoans'));
+        // lấy danh sách tài khoản (paginate nếu cần)
+        $taiKhoans = TaiKhoan::with('nguoiDung')->orderBy('TenDangNhap')->get();
+
+        // lấy danh sách user (NguoiDung) để so sánh (nếu muốn hiển thị)
+        $nguoiDungs = NguoiDung::orderBy('MaNguoiDung')->get();
+
+        return view('AdminTaiKhoan', [
+            'taiKhoans' => $taiKhoans,
+            'nguoiDungs' => $nguoiDungs,
+        ]);
     }
 
-    /**
-     * Override store method to validate MaNguoiDung
-     */
+    // Trả về view data của 1 tài khoản để populate form edit (AJAX)
+    public function edit($tenDangNhap)
+    {
+        $tk = TaiKhoan::findOrFail($tenDangNhap);
+        return response()->json([
+            'success' => true,
+            'data' => $tk,
+        ]);
+    }
+
+    // Tạo mới
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $data = $request->all();
+
+        $validator = Validator::make($data, [
             'TenDangNhap' => 'required|string|max:50|unique:TaiKhoan,TenDangNhap',
             'MatKhau' => 'required|string|min:6',
-            'LoaiTaiKhoan' => 'required|in:Admin,User',
-            'MaNguoiDung' => 'required|exists:NguoiDung,MaNguoiDung',
+            'LoaiTaiKhoan' => ['required', Rule::in(['admin','user'])],
+            // THAY ĐỔI: từ nullable thành required khi tạo mới
+            'MaNguoiDung' => 'required|integer|exists:NguoiDung,MaNguoiDung|unique:TaiKhoan,MaNguoiDung',
         ]);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput()
-                ->with('error', 'Có lỗi xảy ra khi thêm tài khoản!');
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        // Check if MaNguoiDung already has an account
-        $existingAccount = TaiKhoan::where('MaNguoiDung', $request->MaNguoiDung)->first();
-        if ($existingAccount) {
-            return redirect()->back()
-                ->withErrors(['MaNguoiDung' => 'Mã người dùng này đã có tài khoản!'])
-                ->withInput()
-                ->with('error', 'Mã người dùng này đã có tài khoản!');
-        }
-
-        DB::transaction(function() use ($request) {
-            TaiKhoan::create([
-                'TenDangNhap' => $request->TenDangNhap,
-                'MatKhau' => $request->MatKhau, // Password will be hashed by mutator
-                'LoaiTaiKhoan' => $request->LoaiTaiKhoan,
-                'MaNguoiDung' => $request->MaNguoiDung,
+        try {
+            // tạo bản ghi — model hash mật khẩu qua mutator
+            $tk = TaiKhoan::create([
+                'TenDangNhap' => $data['TenDangNhap'],
+                'MatKhau' => $data['MatKhau'],
+                'LoaiTaiKhoan' => $data['LoaiTaiKhoan'],
+                'MaNguoiDung' => $data['MaNguoiDung'] ?? null,
             ]);
-        });
 
-        return redirect()->route('admin.taikhoan.index')->with('success', 'Thêm tài khoản thành công!');
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'data' => $tk], 201);
+            }
+            return redirect()->route('admin.taikhoan.index')->with('success', 'Tạo tài khoản thành công.');
+        } catch (\Exception $e) {
+            Log::error('TaiKhoan store error: ' . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Lỗi khi tạo tài khoản.'], 500);
+            }
+            return redirect()->back()->with('error', 'Lỗi khi tạo tài khoản.')->withInput();
+        }
     }
 
-    /**
-     * Override update method
-     */
-    public function update(Request $request, $id)
+    // Cập nhật
+    public function update(Request $request, $tenDangNhap)
     {
-        $validator = Validator::make($request->all(), [
-            'MatKhau' => 'sometimes|string|min:6',
-            'LoaiTaiKhoan' => 'required|in:Admin,User',
-        ]);
+        $tk = TaiKhoan::findOrFail($tenDangNhap);
+
+        $data = $request->all();
+
+        $rules = [
+            // TenDangNhap là PK — không cho sửa PK. (nếu muốn sửa PK, cần logic phức tạp)
+            //'TenDangNhap' => 'required|string|max:50|unique:TaiKhoan,TenDangNhap,'.$tenDangNhap .',TenDangNhap',
+            'MatKhau' => 'nullable|string|min:6',
+            'LoaiTaiKhoan' => ['required', Rule::in(['admin','user'])],
+            // LOẠI BỎ: validation cho MaNguoiDung trong update vì không cho phép sửa
+            // 'MaNguoiDung' => ['nullable','integer', 'exists:NguoiDung,MaNguoiDung',
+            //     Rule::unique('TaiKhoan', 'MaNguoiDung')->ignore($tk->TenDangNhap, 'TenDangNhap')
+            // ],
+        ];
+
+        $validator = Validator::make($data, $rules);
 
         if ($validator->fails()) {
-            return redirect()->back()
-                ->withErrors($validator)
-                ->withInput()
-                ->with('error', 'Có lỗi xảy ra khi cập nhật tài khoản!');
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+            }
+            return redirect()->back()->withErrors($validator)->withInput();
         }
 
-        DB::transaction(function() use ($request, $id) {
-            $taiKhoan = TaiKhoan::findOrFail($id);
-            
+        try {
+            // Nếu MatKhau rỗng -> giữ nguyên mật khẩu hiện tại
             $updateData = [
-                'LoaiTaiKhoan' => $request->LoaiTaiKhoan,
+                'LoaiTaiKhoan' => $data['LoaiTaiKhoan'],
+                // KHÔNG cập nhật MaNguoiDung khi sửa
+                // 'MaNguoiDung' => $data['MaNguoiDung'] ?? null,
             ];
 
-            // Only update password if provided
-            if ($request->filled('MatKhau')) {
-                $updateData['MatKhau'] = $request->MatKhau;
+            if (!empty($data['MatKhau'])) {
+                $updateData['MatKhau'] = $data['MatKhau']; // model sẽ hash qua mutator
             }
 
-            $taiKhoan->update($updateData);
-        });
+            $tk->update($updateData);
 
-        return redirect()->route('admin.taikhoan.index')->with('success', 'Cập nhật tài khoản thành công!');
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true, 'data' => $tk]);
+            }
+            return redirect()->route('admin.taikhoan.index')->with('success', 'Cập nhật thành công.');
+        } catch (\Exception $e) {
+            Log::error('TaiKhoan update error: ' . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Lỗi khi cập nhật tài khoản.'], 500);
+            }
+            return redirect()->back()->with('error', 'Lỗi khi cập nhật tài khoản.');
+        }
     }
 
-    /**
-     * Get account data for editing
-     */
-    public function getAccountData($id)
+    // Xoá
+    public function destroy(Request $request, $tenDangNhap)
     {
-        $taiKhoan = TaiKhoan::with('nguoiDung')->findOrFail($id);
-        return response()->json($taiKhoan);
+        try {
+            $tk = TaiKhoan::findOrFail($tenDangNhap);
+            $tk->delete();
+
+            if ($request->wantsJson()) {
+                return response()->json(['success' => true]);
+            }
+            return redirect()->route('admin.taikhoan.index')->with('success', 'Xoá tài khoản thành công.');
+        } catch (\Exception $e) {
+            Log::error('TaiKhoan destroy error: ' . $e->getMessage());
+            if ($request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Lỗi khi xoá tài khoản.'], 500);
+            }
+            return redirect()->back()->with('error', 'Lỗi khi xoá tài khoản.');
+        }
     }
 
-    /**
-     * Get users without accounts for dropdown
-     */
+    // API: trả về danh sách NguoiDung chưa có tài khoản
     public function getUsersWithoutAccounts()
     {
+        // lấy MaNguoiDung từ NguoiDung mà chưa có trong TaiKhoan
         $users = NguoiDung::whereNotIn('MaNguoiDung', function($query) {
             $query->select('MaNguoiDung')->from('TaiKhoan')->whereNotNull('MaNguoiDung');
         })->get();
 
-        return response()->json($users);
+        return response()->json(['success' => true, 'data' => $users]);
     }
 }

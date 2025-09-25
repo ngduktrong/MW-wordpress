@@ -47,11 +47,17 @@ Route::prefix('admin')->group(function () {
 // TaiKhoan Routes
 Route::prefix('admin')->group(function () {
     Route::get('/taikhoan', [TaiKhoanController::class, 'adminIndex'])->name('admin.taikhoan.index');
-    Route::post('/taikhoan', [TaiKhoanController::class, 'store'])->name('admin.taikhoan.store');
-    Route::get('/taikhoan/{id}/edit', [TaiKhoanController::class, 'edit'])->name('admin.taikhoan.edit');
-    Route::put('/taikhoan/{id}', [TaiKhoanController::class, 'update'])->name('admin.taikhoan.update');
-    Route::delete('/taikhoan/{id}', [TaiKhoanController::class, 'destroy'])->name('admin.taikhoan.destroy');
+
+    // đặt route static /users/... lên trước các route có param
     Route::get('/taikhoan/users/without-accounts', [TaiKhoanController::class, 'getUsersWithoutAccounts'])->name('admin.taikhoan.users.without.accounts');
+
+    Route::post('/taikhoan', [TaiKhoanController::class, 'store'])->name('admin.taikhoan.store');
+
+    Route::get('/taikhoan/{tenDangNhap}/edit', [TaiKhoanController::class, 'edit'])->name('admin.taikhoan.edit')->where('tenDangNhap', '.+');
+
+    Route::put('/taikhoan/{tenDangNhap}', [TaiKhoanController::class, 'update'])->name('admin.taikhoan.update')->where('tenDangNhap', '.+');
+
+    Route::delete('/taikhoan/{tenDangNhap}', [TaiKhoanController::class, 'destroy'])->name('admin.taikhoan.destroy')->where('tenDangNhap', '.+');
 });
 
 // Route test database (giữ nguyên cho debug)
