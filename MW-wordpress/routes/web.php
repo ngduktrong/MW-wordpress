@@ -8,6 +8,29 @@ use App\Http\Controllers\SuatChieuController;
 use App\Http\Controllers\GheController;
 use App\Http\Controllers\NguoiDungController;
 use App\Http\Controllers\TaiKhoanController;
+use App\Http\Controllers\LoginController;
+use App\Http\Controllers\RegisterController;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+
+Route::get('/', function () {
+    return redirect()->route('login');
+});
+
+// Route đăng nhập/đăng ký
+Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [LoginController::class, 'login']);
+Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+
+Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
+Route::post('/register', [RegisterController::class, 'register']);
+
+// Các route admin cần auth
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', function () {
+        return view('AdminDashBoard');
+    })->name('admin.dashboard');
+});
 
 // Trang quản lý phim (hiển thị view AdminPhim.php)
 Route::get('/admin/phim', [PhimController::class, 'showAdminPage'])->name('admin.phim');

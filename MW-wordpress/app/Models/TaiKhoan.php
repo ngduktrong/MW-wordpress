@@ -2,10 +2,10 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Foundation\Auth\User as Authenticatable; // THAY ĐỔI DÒNG NÀY
 use Illuminate\Support\Facades\Hash;
 
-class TaiKhoan extends Model
+class TaiKhoan extends Authenticatable // THAY ĐỔI: extends Authenticatable thay vì Model
 {
     protected $table = 'TaiKhoan';
 
@@ -26,6 +26,37 @@ class TaiKhoan extends Model
     protected $casts = [
         'MaNguoiDung' => 'integer',
     ];
+
+    // Thêm các method cần thiết cho Authenticatable
+    public function getAuthIdentifierName()
+    {
+        return 'TenDangNhap';
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->TenDangNhap;
+    }
+
+    public function getAuthPassword()
+    {
+        return $this->MatKhau;
+    }
+
+    public function getRememberToken()
+    {
+        return $this->remember_token;
+    }
+
+    public function setRememberToken($value)
+    {
+        $this->remember_token = $value;
+    }
+
+    public function getRememberTokenName()
+    {
+        return 'remember_token';
+    }
 
     // Mutator: tự hash mật khẩu khi set (nếu chưa được hash)
     public function setMatKhauAttribute($value)

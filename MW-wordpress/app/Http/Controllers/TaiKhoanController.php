@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Hash;
 
 class TaiKhoanController extends Controller
 {
@@ -64,7 +65,7 @@ class TaiKhoanController extends Controller
             // tạo bản ghi — model hash mật khẩu qua mutator
             $tk = TaiKhoan::create([
                 'TenDangNhap' => $data['TenDangNhap'],
-                'MatKhau' => $data['MatKhau'],
+                'MatKhau' => Hash::make($data['MatKhau']),
                 'LoaiTaiKhoan' => $data['LoaiTaiKhoan'],
                 'MaNguoiDung' => $data['MaNguoiDung'] ?? null,
             ]);
@@ -118,7 +119,7 @@ class TaiKhoanController extends Controller
             ];
 
             if (!empty($data['MatKhau'])) {
-                $updateData['MatKhau'] = $data['MatKhau']; // model sẽ hash qua mutator
+                $updateData['MatKhau'] = Hash::make($data['MatKhau']); 
             }
 
             $tk->update($updateData);
