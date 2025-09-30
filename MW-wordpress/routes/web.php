@@ -12,6 +12,8 @@ use App\Http\Controllers\LoginController;
 use App\Http\Controllers\RegisterController;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\KhachHangController;
+use App\Http\Controllers\NhanVienController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -81,6 +83,40 @@ Route::prefix('admin')->group(function () {
     Route::put('/taikhoan/{tenDangNhap}', [TaiKhoanController::class, 'update'])->name('admin.taikhoan.update')->where('tenDangNhap', '.+');
 
     Route::delete('/taikhoan/{tenDangNhap}', [TaiKhoanController::class, 'destroy'])->name('admin.taikhoan.destroy')->where('tenDangNhap', '.+');
+});
+Route::prefix('admin')->group(function () {
+    // Trang quản lý khách hàng
+    Route::get('/khach-hang', [KhachHangController::class, 'index'])
+        ->name('admin.khachhang.index');
+        Route::get('/khach-hang/check/{maNguoiDung}', [KhachHangController::class, 'checkUser'])
+        ->name('admin.khachhang.checkUser');
+
+    // Thêm khách hàng
+    Route::post('/khach-hang', [KhachHangController::class, 'store'])
+        ->name('admin.khachhang.store');
+
+    // Sửa khách hàng
+    Route::put('/khach-hang/{id}', [KhachHangController::class, 'update'])
+        ->name('admin.khachhang.update');
+
+    // Xóa khách hàng
+    Route::delete('/khach-hang/{id}', [KhachHangController::class, 'destroy'])
+        ->name('admin.khachhang.destroy');
+
+    
+});
+Route::get('/admin/nhanvien', function () {
+    return view('AdminNhanVIen'); // resources/views/AdminNhanVIen.blade.php
+})->name('admin.nhanvien.page');
+
+// API endpoints (JSON) dùng cho AJAX
+Route::prefix('admin')->group(function () {
+    Route::get('/nhanvien/list', [NhanVienController::class, 'index'])->name('admin.nhanvien.list');
+    Route::post('/nhanvien', [NhanVienController::class, 'store'])->name('admin.nhanvien.store');
+    Route::put('/nhanvien/{id}', [NhanVienController::class, 'update'])->name('admin.nhanvien.update');
+    Route::delete('/nhanvien/{id}', [NhanVienController::class, 'destroy'])->name('admin.nhanvien.destroy');
+    Route::get('/nhanvien/nguoidung-chua-co', [NhanVienController::class, 'getNguoiDungChuaCoTaiKhoan'])
+         ->name('admin.nhanvien.nguoidung_chua_co');
 });
 
 // Route test database (giữ nguyên cho debug)

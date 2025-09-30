@@ -11,57 +11,30 @@ class KhachHang extends Model
 
     protected $table = 'KhachHang';
     protected $primaryKey = 'MaNguoiDung';
-    public $incrementing = false;
     public $timestamps = false;
 
+    // Khóa chính không auto-increment (vì lấy từ bảng NguoiDung)
+    public $incrementing = false;
+    protected $keyType = 'int';
+
     protected $fillable = [
-        'MaNguoiDung',
-        'DiemTichLuy'
+        // 'MaNguoiDung', // cân nhắc bỏ để tránh mass-assignment của PK
+        'DiemTichLuy',
     ];
 
     protected $casts = [
-        'DiemTichLuy' => 'integer'
+        'DiemTichLuy' => 'integer',
     ];
 
-    /**
-     * Mối quan hệ với bảng NguoiDung
-     */
+    // Quan hệ: KhachHang thuộc về 1 NguoiDung
     public function nguoiDung()
     {
         return $this->belongsTo(NguoiDung::class, 'MaNguoiDung', 'MaNguoiDung');
     }
 
-    /**
-     * Mối quan hệ với bảng HoaDon
-     */
-    public function hoaDons()
+    // KhachHang có nhiều HoaDon
+    public function hoaDon()
     {
         return $this->hasMany(HoaDon::class, 'MaKhachHang', 'MaNguoiDung');
-    }
-
-    /**
-     * Tăng điểm tích lũy cho khách hàng
-     */
-    public function tangDiemTichLuy($diem)
-    {
-        $this->DiemTichLuy += $diem;
-        return $this->save();
-    }
-
-    /**
-     * Giảm điểm tích lũy cho khách hàng
-     */
-    public function giamDiemTichLuy($diem)
-    {
-        $this->DiemTichLuy = max(0, $this->DiemTichLuy - $diem);
-        return $this->save();
-    }
-
-    /**
-     * Scope để lọc khách hàng có điểm tích lũy tối thiểu
-     */
-    public function scopeCoDiemTichLuy($query, $diemToiThieu)
-    {
-        return $query->where('DiemTichLuy', '>=', $diemToiThieu);
     }
 }

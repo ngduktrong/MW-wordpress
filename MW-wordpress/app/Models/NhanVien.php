@@ -2,18 +2,19 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NhanVien extends Model
 {
-    use HasFactory;
-
+    // Bảng NhanVien dùng MaNguoiDung làm khóa chính (foreign key đến NguoiDung)
     protected $table = 'NhanVien';
     protected $primaryKey = 'MaNguoiDung';
-    public $incrementing = false;
+    public $incrementing = false; // nếu MaNguoiDung không tự tăng
+    protected $keyType = 'int'; // đổi sang 'string' nếu mã là chuỗi
     public $timestamps = false;
 
+    // Cho phép gán hàng loạt cho các trường này
     protected $fillable = [
         'MaNguoiDung',
         'ChucVu',
@@ -22,62 +23,15 @@ class NhanVien extends Model
     ];
 
     protected $casts = [
-        'Luong' => 'decimal:2'
+        'Luong' => 'float',
+        'MaNguoiDung' => 'int',
     ];
 
     /**
-     * Mối quan hệ với bảng NguoiDung
+     * Quan hệ tới bảng NguoiDung
      */
-    public function nguoiDung()
+    public function nguoiDung(): BelongsTo
     {
         return $this->belongsTo(NguoiDung::class, 'MaNguoiDung', 'MaNguoiDung');
-    }
-
-    /**
-     * Mối quan hệ với bảng HoaDon
-     */
-    public function hoaDons()
-    {
-        return $this->hasMany(HoaDon::class, 'MaNhanVien', 'MaNguoiDung');
-    }
-
-    /**
-     * Kiểm tra xem nhân viên có phải là Admin không
-     */
-    public function isAdmin()
-    {
-        return $this->VaiTro === 'Admin';
-    }
-
-    /**
-     * Kiểm tra xem nhân viên có phải là Quản lý không
-     */
-    public function isQuanLy()
-    {
-        return $this->VaiTro === 'QuanLy';
-    }
-
-    /**
-     * Kiểm tra xem nhân viên có phải là Thu ngân không
-     */
-    public function isThuNgan()
-    {
-        return $this->VaiTro === 'ThuNgan';
-    }
-
-    /**
-     * Kiểm tra xem nhân viên có phải là Bán vé không
-     */
-    public function isBanVe()
-    {
-        return $this->VaiTro === 'BanVe';
-    }
-
-    /**
-     * Scope để lọc theo vai trò
-     */
-    public function scopeVaiTro($query, $vaiTro)
-    {
-        return $query->where('VaiTro', $vaiTro);
     }
 }

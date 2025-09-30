@@ -80,17 +80,17 @@
 </header>
 <div class="container">
     <nav>
-        <a href="#">Tài Khoản</a>
-        <a href="#">Người Dùng</a>
-        <a href="#">Nhân Viên</a>
-        <a href="#">Khách Hàng</a>
-        <a href="{{ route('admin.phim') }}">Phim</a>
-        <a href="#">Phòng Chiếu</a>
-        <a href="#">Suất Chiếu</a>
-        <a href="#">Vé</a>
-        <a href="#">Hóa Đơn</a>
-        <a href="#">Ghế</a>
-        <a href="#">Thông báo</a>
+        <a href="{{ route('admin.taikhoan.index') }}">Tài Khoản</a>
+    <a href="{{ route('admin.nguoidung.index') }}">Người Dùng</a>
+    <a href="/admin/nhanvien">Nhân Viên</a>
+    <a href="{{ route('admin.khachhang.index') }}">Khách Hàng</a>
+    <a href="{{ route('admin.phim') }}">Phim</a>
+    <a href="{{ route('admin.phongchieu.index') }}">Phòng Chiếu</a>
+    <a href="{{ route('admin.suatchieu.index') }}">Suất Chiếu</a>
+    <a href="{{ route('ghe.index') }}">Ghế</a>
+    <a href="#">Vé</a>
+    <a href="#">Hóa Đơn</a>
+    <a href="#">Thông báo</a>
     </nav>
     <main>
         <div class="welcome-section">

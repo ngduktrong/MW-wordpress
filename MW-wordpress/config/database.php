@@ -59,17 +59,11 @@ return [
     'engine' => null,
 
     'options' => extension_loaded('pdo_mysql') ? array_filter([
-        PDO::MYSQL_ATTR_SSL_CA => (function () {
-            $ca = env('DB_SSL_CA');
-            if (!$ca) return null;
-
-            // Nếu cung cấp relative path (ví dụ ssl/aiven-ca.pem), thì nối với base_path()
-            $fullPath = base_path($ca);
-            return file_exists($fullPath) ? $fullPath : null;
-        })(),
-        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => env('DB_SSL_VERIFY_SERVER_CERT', false) ? true : false,
+        PDO::MYSQL_ATTR_SSL_CA => base_path(env('DB_SSL_CA')),  // load file cert
+        PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT => filter_var(env('DB_SSL_VERIFY_SERVER_CERT', false), FILTER_VALIDATE_BOOLEAN),
     ]) : [],
 ],
+
 
 
         'mariadb' => [

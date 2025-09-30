@@ -48,11 +48,7 @@ class NguoiDungController extends BaseCrudController
                 'LoaiNguoiDung' => $data['LoaiNguoiDung'],
             ]);
 
-            // ĐÃ BỎ: Tự động tạo tài khoản
-            // $this->taoTaiKhoanTuDong($nguoiDung);
-
-            // Chỉ tạo bản ghi phụ
-            $this->taoBanGhiPhu($nguoiDung, $request);
+            
         });
 
         return redirect()->route('admin.nguoidung.index')->with('success', 'Thêm người dùng thành công!');
@@ -87,7 +83,7 @@ class NguoiDungController extends BaseCrudController
         DB::transaction(function() use ($id) {
             $nguoiDung = NguoiDung::findOrFail($id);
 
-            // Xóa tài khoản liên quan nếu có
+            
             TaiKhoan::where('MaNguoiDung', $id)->delete();
             KhachHang::where('MaNguoiDung', $id)->delete();
             NhanVien::where('MaNguoiDung', $id)->delete();
@@ -115,42 +111,22 @@ class NguoiDungController extends BaseCrudController
         return $prefix . str_pad($sequence, 3, '0', STR_PAD_LEFT);
     }
 
-    // ĐÃ BỎ PHẦN TẠO TÀI KHOẢN TỰ ĐỘNG
-    // private function taoTaiKhoanTuDong(NguoiDung $nguoiDung) {}
-
     private function taoBanGhiPhu(NguoiDung $nguoiDung, Request $request)
     {
-        if ($nguoiDung->LoaiNguoiDung === 'KhachHang') {
-            KhachHang::create([
-                'MaNguoiDung' => $nguoiDung->MaNguoiDung,
-                'DiemTichLuy' => $request->input('DiemTichLuy', 0),
-            ]);
-        } else {
-            NhanVien::create([
-                'MaNguoiDung' => $nguoiDung->MaNguoiDung,
-                'ChucVu' => $request->input('ChucVu', 'Nhân viên'),
-                'Luong' => $request->input('Luong', 0),
-                'VaiTro' => $request->input('VaiTro', 'BanVe'),
-            ]);
-        }
+       
     }
 
     private function capNhatBanGhiPhu(NguoiDung $nguoiDung, Request $request)
     {
         if ($nguoiDung->LoaiNguoiDung === 'KhachHang') {
+            
             NhanVien::where('MaNguoiDung', $nguoiDung->MaNguoiDung)->delete();
-
-            $kh = KhachHang::firstOrNew(['MaNguoiDung' => $nguoiDung->MaNguoiDung]);
-            $kh->DiemTichLuy = $request->input('DiemTichLuy', $kh->DiemTichLuy ?? 0);
-            $kh->save();
+            
         } else {
+            
             KhachHang::where('MaNguoiDung', $nguoiDung->MaNguoiDung)->delete();
 
-            $nv = NhanVien::firstOrNew(['MaNguoiDung' => $nguoiDung->MaNguoiDung]);
-            $nv->ChucVu = $request->input('ChucVu', $nv->ChucVu ?? 'Nhân viên');
-            $nv->Luong = $request->input('Luong', $nv->Luong ?? 0);
-            $nv->VaiTro = $request->input('VaiTro', $nv->VaiTro ?? 'BanVe');
-            $nv->save();
+            
         }
     }
 
