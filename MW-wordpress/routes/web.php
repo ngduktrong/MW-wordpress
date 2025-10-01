@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\NhanVienController;
+use App\Http\Controllers\VeController;
+use App\Http\Controllers\HoaDonController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -61,6 +63,39 @@ Route::put('/ghe/{maPhong}/{soGhe}', [GheController::class, 'update'])->name('gh
 Route::delete('/ghe/{maPhong}/{soGhe}', [GheController::class, 'destroy'])->name('ghe.destroy');
 Route::get('/ghe/edit/{maPhong}/{soGhe}', [GheController::class, 'edit'])->name('ghe.edit');
 
+// HoaDon Routes
+Route::get('/hoadon', [HoaDonController::class, 'index']);
+Route::post('/hoadon', [HoaDonController::class, 'store']);
+Route::get('/hoadon/{id}', [HoaDonController::class, 'show']);
+Route::put('/hoadon/{id}', [HoaDonController::class, 'update']);
+Route::delete('/hoadon/{id}', [HoaDonController::class, 'destroy']);
+
+// HoaDon Search & Statistics
+Route::get('/hoadon/khachhang/{maKhachHang}', [HoaDonController::class, 'getByMaKhachHang']);
+Route::get('/hoadon/ngay/{ngay}', [HoaDonController::class, 'getByNgayLap']);
+Route::post('/hoadon/khoangngay', [HoaDonController::class, 'getByKhoangNgay']);
+Route::get('/hoadon/doanhthu/ngay/{ngay}', [HoaDonController::class, 'getTongDoanhThuTheoNgay']);
+Route::post('/hoadon/doanhthu/khoangngay', [HoaDonController::class, 'getTongDoanhThuTheoKhoangNgay']);
+Route::put('/hoadon/capnhatngaylap/{maHoaDon}', [HoaDonController::class, 'capNhatNgayLapTuVe']);
+
+Route::get('/ve', [VeController::class, 'index']);
+Route::post('/ve', [VeController::class, 'store']);
+Route::get('/ve/{id}', [VeController::class, 'show']);
+Route::put('/ve/{id}', [VeController::class, 'update']);
+Route::delete('/ve/{id}', [VeController::class, 'destroy']);
+
+// Ve Additional Routes
+Route::post('/ve/danhsach', [VeController::class, 'getVesByIds']);
+Route::put('/ve/thanhtoan/{id}', [VeController::class, 'updateTrangThaiVeToPaid']);
+Route::get('/ve/hoadon/{maHoaDon}', [VeController::class, 'getVeByMaHoaDon']);
+Route::get('/ve/khachhang/{maKhachHang}', [VeController::class, 'getVeByMaKhachHang']);
+Route::get('/ve/suatchieu/{maSuatChieu}', [VeController::class, 'getSoGheDaDatBySuatChieu']);
+Route::get('/ve/thongke/sovedathanhtoan', [VeController::class, 'getSoVeDaThanhToan']);
+
+// Admin Views
+Route::get('/admin/hoadon', [HoaDonController::class, 'index']);
+Route::get('/admin/ve', [VeController::class, 'index']);
+// nguoiDUng Routes
 Route::prefix('admin')->group(function () {
     Route::get('/nguoidung', [NguoiDungController::class, 'adminIndex'])->name('admin.nguoidung.index');
     Route::get('/nguoidung/create', [NguoiDungController::class, 'create'])->name('admin.nguoidung.create'); // thêm
