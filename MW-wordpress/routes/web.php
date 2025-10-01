@@ -16,6 +16,7 @@ use App\Http\Controllers\KhachHangController;
 use App\Http\Controllers\NhanVienController;
 use App\Http\Controllers\VeController;
 use App\Http\Controllers\HoaDonController;
+use App\Http\Controllers\KiemTraVeSapChieuController;
 
 Route::get('/', function () {
     return redirect()->route('login');
@@ -67,7 +68,7 @@ Route::get('/ghe/edit/{maPhong}/{soGhe}', [GheController::class, 'edit'])->name(
 Route::get('/hoadon', [HoaDonController::class, 'index']);
 Route::post('/hoadon', [HoaDonController::class, 'store']);
 Route::get('/hoadon/{id}', [HoaDonController::class, 'show']);
-Route::put('/hoadon/{id}', [HoaDonController::class, 'update']);
+
 Route::delete('/hoadon/{id}', [HoaDonController::class, 'destroy']);
 
 // HoaDon Search & Statistics
@@ -81,7 +82,6 @@ Route::put('/hoadon/capnhatngaylap/{maHoaDon}', [HoaDonController::class, 'capNh
 Route::get('/ve', [VeController::class, 'index']);
 Route::post('/ve', [VeController::class, 'store']);
 Route::get('/ve/{id}', [VeController::class, 'show']);
-Route::put('/ve/{id}', [VeController::class, 'update']);
 Route::delete('/ve/{id}', [VeController::class, 'destroy']);
 
 // Ve Additional Routes
@@ -93,8 +93,9 @@ Route::get('/ve/suatchieu/{maSuatChieu}', [VeController::class, 'getSoGheDaDatBy
 Route::get('/ve/thongke/sovedathanhtoan', [VeController::class, 'getSoVeDaThanhToan']);
 
 // Admin Views
-Route::get('/admin/hoadon', [HoaDonController::class, 'index']);
-Route::get('/admin/ve', [VeController::class, 'index']);
+Route::get('/admin/hoadon', [HoaDonController::class, 'index'])->name('admin.hoadon.index');
+Route::get('/admin/ve', [VeController::class, 'index'])->name('admin.ve.index');
+
 // nguoiDUng Routes
 Route::prefix('admin')->group(function () {
     Route::get('/nguoidung', [NguoiDungController::class, 'adminIndex'])->name('admin.nguoidung.index');
@@ -154,6 +155,13 @@ Route::prefix('admin')->group(function () {
          ->name('admin.nhanvien.nguoidung_chua_co');
 });
 
+Route::prefix('admin')->group(function () {
+    
+    
+    Route::get('/kiem-tra-ve-sap-chieu', [KiemTraVeSapChieuController::class, 'index'])->name('admin.kiemtra.index');
+    Route::get('/kiem-tra-ve-sap-chieu/danh-sach', [KiemTraVeSapChieuController::class, 'danhSachVeSapChieu'])->name('admin.kiemtra.danhsach');
+    Route::get('/kiem-tra-ve-sap-chieu/thong-bao', [KiemTraVeSapChieuController::class, 'thongBaoVeSapChieu'])->name('admin.kiemtra.thongbao');
+});
 // Route test database (giữ nguyên cho debug)
 Route::get('/test-db', function () {
     try {

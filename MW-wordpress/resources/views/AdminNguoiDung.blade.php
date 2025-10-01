@@ -32,6 +32,9 @@
 <body>
     <div class="container mt-4">
         <h1 class="text-center mb-4">Quản lý Người Dùng</h1>
+        <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                    </a>
 
         {{-- Hiện thông báo lỗi validation --}}
         @if($errors->any())

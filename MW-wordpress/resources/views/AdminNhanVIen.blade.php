@@ -11,6 +11,9 @@
 <body class="p-4">
   <div class="container">
     <h2>Quản lý Nhân Viên</h2>
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                    </a>
 
     <!-- Form thêm / sửa nhân viên (gõ mã bằng tay) -->
     <form id="nhanvien-form" class="mb-4">

@@ -6,12 +6,30 @@
     <title>Quản lý Hóa đơn</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .is-invalid {
+            border-color: #dc3545 !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6.4.4.4-.4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <h1 class="text-center mt-4">QUẢN LÝ HÓA ĐƠN</h1>
+                <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                </a>
             </div>
         </div>
 
@@ -28,14 +46,17 @@
                             <div class="mb-3">
                                 <label for="MaNhanVien" class="form-label">Mã nhân viên</label>
                                 <input type="number" class="form-control" id="MaNhanVien" name="MaNhanVien">
+                                <div class="invalid-feedback" id="error-MaNhanVien"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="MaKhachHang" class="form-label">Mã khách hàng</label>
                                 <input type="number" class="form-control" id="MaKhachHang" name="MaKhachHang">
+                                <div class="invalid-feedback" id="error-MaKhachHang"></div>
                             </div>
                             <div class="mb-3">
-                                <label for="TongTien" class="form-label">Tổng tiền</label>
+                                <label for="TongTien" class="form-label">Tổng tiền *</label>
                                 <input type="number" step="0.01" class="form-control" id="TongTien" name="TongTien" required>
+                                <div class="invalid-feedback" id="error-TongTien"></div>
                             </div>
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save"></i> Tạo hóa đơn
@@ -157,9 +178,6 @@
                                         <td>{{ number_format($hoadon->TongTien, 2) }}</td>
                                         <td>{{ $hoadon->ves->count() }}</td>
                                         <td>
-                                            <button class="btn btn-warning btn-sm" onclick="editHoaDon({{ $hoadon->MaHoaDon }})">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
                                             <button class="btn btn-danger btn-sm" onclick="deleteHoaDon({{ $hoadon->MaHoaDon }})">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -178,46 +196,50 @@
         </div>
     </div>
 
-    <!-- Modal sửa hóa đơn -->
-    <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Sửa hóa đơn</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formSuaHoaDon">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" id="editMaHoaDon" name="MaHoaDon">
-                        <div class="mb-3">
-                            <label for="editMaNhanVien" class="form-label">Mã nhân viên</label>
-                            <input type="number" class="form-control" id="editMaNhanVien" name="MaNhanVien">
-                        </div>
-                        <div class="mb-3">
-                            <label for="editMaKhachHang" class="form-label">Mã khách hàng</label>
-                            <input type="number" class="form-control" id="editMaKhachHang" name="MaKhachHang">
-                        </div>
-                        <div class="mb-3">
-                            <label for="editTongTien" class="form-label">Tổng tiền</label>
-                            <input type="number" step="0.01" class="form-control" id="editTongTien" name="TongTien" required>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="updateHoaDon()">Lưu thay đổi</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Hàm hiển thị lỗi validation
+        function displayErrors(errors) {
+            for (const [field, messages] of Object.entries(errors)) {
+                const errorElement = document.getElementById(`error-${field}`);
+                const inputElement = document.getElementById(field);
+                
+                if (errorElement && inputElement) {
+                    errorElement.textContent = messages[0];
+                    inputElement.classList.add('is-invalid');
+                }
+            }
+        }
+
+        // Hàm reset lỗi
+        function resetErrors() {
+            document.querySelectorAll('.is-invalid').forEach(element => {
+                element.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(element => {
+                element.textContent = '';
+            });
+        }
+
+        // Reset lỗi khi người dùng bắt đầu nhập
+        document.querySelectorAll('#formThemHoaDon input').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    this.classList.remove('is-invalid');
+                    const errorElement = document.getElementById(`error-${this.id}`);
+                    if (errorElement) {
+                        errorElement.textContent = '';
+                    }
+                }
+            });
+        });
+
         // Thêm hóa đơn
         document.getElementById('formThemHoaDon').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Reset lỗi trước khi gửi
+            resetErrors();
             
             fetch('/hoadon', {
                 method: 'POST',
@@ -231,7 +253,15 @@
                     TongTien: document.getElementById('TongTien').value
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    // Nếu response không ok, parse lỗi
+                    return response.json().then(errorData => {
+                        throw errorData;
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     alert('Tạo hóa đơn thành công! Mã hóa đơn: ' + data.MaHoaDon);
@@ -240,7 +270,15 @@
                     alert('Lỗi: ' + data.message);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                if (error.errors) {
+                    // Hiển thị lỗi validation
+                    displayErrors(error.errors);
+                } else {
+                    alert('Lỗi: ' + (error.message || 'Có lỗi xảy ra'));
+                }
+            });
         });
 
         // Các hàm tìm kiếm và thống kê
@@ -329,9 +367,6 @@
                         <td>${Number(hoadon.TongTien).toLocaleString()}</td>
                         <td>${hoadon.ves ? hoadon.ves.length : 0}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm" onclick="editHoaDon(${hoadon.MaHoaDon})">
-                                <i class="fas fa-edit"></i>
-                            </button>
                             <button class="btn btn-danger btn-sm" onclick="deleteHoaDon(${hoadon.MaHoaDon})">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -342,46 +377,6 @@
                     </tr>
                 `;
                 tbody.innerHTML += row;
-            });
-        }
-
-        // Sửa hóa đơn
-        function editHoaDon(maHoaDon) {
-            fetch(`/hoadon/${maHoaDon}`)
-                .then(response => response.json())
-                .then(hoadon => {
-                    document.getElementById('editMaHoaDon').value = hoadon.MaHoaDon;
-                    document.getElementById('editMaNhanVien').value = hoadon.MaNhanVien || '';
-                    document.getElementById('editMaKhachHang').value = hoadon.MaKhachHang || '';
-                    document.getElementById('editTongTien').value = hoadon.TongTien;
-                    
-                    new bootstrap.Modal(document.getElementById('editModal')).show();
-                });
-        }
-
-        function updateHoaDon() {
-            const maHoaDon = document.getElementById('editMaHoaDon').value;
-            
-            fetch(`/hoadon/${maHoaDon}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    MaNhanVien: document.getElementById('editMaNhanVien').value || null,
-                    MaKhachHang: document.getElementById('editMaKhachHang').value || null,
-                    TongTien: document.getElementById('editTongTien').value
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Cập nhật thành công!');
-                    location.reload();
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
             });
         }
 

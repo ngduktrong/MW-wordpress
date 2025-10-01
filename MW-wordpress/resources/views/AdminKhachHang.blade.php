@@ -25,6 +25,9 @@
 </head>
 <body>
     <h1>Quản trị Khách hàng</h1>
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                    </a>
 
     <!-- Loading Indicator -->
     <div id="loading" class="hidden">Đang xử lý...</div>

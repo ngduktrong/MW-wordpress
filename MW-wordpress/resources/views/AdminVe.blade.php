@@ -6,6 +6,21 @@
     <title>Quản lý Vé</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .is-invalid {
+            border-color: #dc3545 !important;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath d='m5.8 3.6.4.4.4-.4'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+    </style>
 </head>
 <body>
     <div class="container-fluid">
@@ -14,6 +29,9 @@
                 <h1 class="text-center mt-4">QUẢN LÝ VÉ</h1>
             </div>
         </div>
+        <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+        </a>
 
         <!-- Form thêm vé -->
         <div class="row mt-4">
@@ -28,22 +46,27 @@
                             <div class="mb-3">
                                 <label for="MaSuatChieu" class="form-label">Mã suất chiếu *</label>
                                 <input type="number" class="form-control" id="MaSuatChieu" name="MaSuatChieu" required>
+                                <div class="invalid-feedback" id="error-MaSuatChieu"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="MaPhong" class="form-label">Mã phòng *</label>
                                 <input type="number" class="form-control" id="MaPhong" name="MaPhong" required>
+                                <div class="invalid-feedback" id="error-MaPhong"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="SoGhe" class="form-label">Số ghế *</label>
                                 <input type="text" class="form-control" id="SoGhe" name="SoGhe" maxlength="5" required>
+                                <div class="invalid-feedback" id="error-SoGhe"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="MaHoaDon" class="form-label">Mã hóa đơn</label>
                                 <input type="number" class="form-control" id="MaHoaDon" name="MaHoaDon">
+                                <div class="invalid-feedback" id="error-MaHoaDon"></div>
                             </div>
                             <div class="mb-3">
                                 <label for="GiaVe" class="form-label">Giá vé *</label>
                                 <input type="number" step="0.01" class="form-control" id="GiaVe" name="GiaVe" required>
+                                <div class="invalid-feedback" id="error-GiaVe"></div>
                             </div>
                             <button type="submit" class="btn btn-success">
                                 <i class="fas fa-save"></i> Tạo vé
@@ -150,9 +173,6 @@
                                         </td>
                                         <td>{{ $ve->NgayDat ?? 'N/A' }}</td>
                                         <td>
-                                            <button class="btn btn-warning btn-sm" onclick="editVe({{ $ve->MaVe }})">
-                                                <i class="fas fa-edit"></i>
-                                            </button>
                                             <button class="btn btn-danger btn-sm" onclick="deleteVe({{ $ve->MaVe }})">
                                                 <i class="fas fa-trash"></i>
                                             </button>
@@ -173,64 +193,50 @@
         </div>
     </div>
 
-    <!-- Modal sửa vé -->
-    <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Sửa vé</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <form id="formSuaVe">
-                        @csrf
-                        @method('PUT')
-                        <input type="hidden" id="editMaVe" name="MaVe">
-                        <div class="mb-3">
-                            <label for="editMaSuatChieu" class="form-label">Mã suất chiếu *</label>
-                            <input type="number" class="form-control" id="editMaSuatChieu" name="MaSuatChieu" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editMaPhong" class="form-label">Mã phòng *</label>
-                            <input type="number" class="form-control" id="editMaPhong" name="MaPhong" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editSoGhe" class="form-label">Số ghế *</label>
-                            <input type="text" class="form-control" id="editSoGhe" name="SoGhe" maxlength="5" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editMaHoaDon" class="form-label">Mã hóa đơn</label>
-                            <input type="number" class="form-control" id="editMaHoaDon" name="MaHoaDon">
-                        </div>
-                        <div class="mb-3">
-                            <label for="editGiaVe" class="form-label">Giá vé *</label>
-                            <input type="number" step="0.01" class="form-control" id="editGiaVe" name="GiaVe" required>
-                        </div>
-                        <div class="mb-3">
-                            <label for="editTrangThai" class="form-label">Trạng thái *</label>
-                            <select class="form-control" id="editTrangThai" name="TrangThai" required>
-                                <option value="available">Available</option>
-                                <option value="booked">Booked</option>
-                                <option value="paid">Paid</option>
-                                <option value="cancelled">Cancelled</option>
-                                <option value="pending">Pending</option>
-                            </select>
-                        </div>
-                    </form>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
-                    <button type="button" class="btn btn-primary" onclick="updateVe()">Lưu thay đổi</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Hàm hiển thị lỗi validation
+        function displayErrors(errors) {
+            for (const [field, messages] of Object.entries(errors)) {
+                const errorElement = document.getElementById(`error-${field}`);
+                const inputElement = document.getElementById(field);
+                
+                if (errorElement && inputElement) {
+                    errorElement.textContent = messages[0];
+                    inputElement.classList.add('is-invalid');
+                }
+            }
+        }
+
+        // Hàm reset lỗi
+        function resetErrors() {
+            document.querySelectorAll('.is-invalid').forEach(element => {
+                element.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(element => {
+                element.textContent = '';
+            });
+        }
+
+        // Reset lỗi khi người dùng bắt đầu nhập
+        document.querySelectorAll('#formThemVe input').forEach(input => {
+            input.addEventListener('input', function() {
+                if (this.classList.contains('is-invalid')) {
+                    this.classList.remove('is-invalid');
+                    const errorElement = document.getElementById(`error-${this.id}`);
+                    if (errorElement) {
+                        errorElement.textContent = '';
+                    }
+                }
+            });
+        });
+
         // Thêm vé
         document.getElementById('formThemVe').addEventListener('submit', function(e) {
             e.preventDefault();
+            
+            // Reset lỗi trước khi gửi
+            resetErrors();
             
             fetch('/ve', {
                 method: 'POST',
@@ -246,7 +252,15 @@
                     GiaVe: document.getElementById('GiaVe').value
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    // Nếu response không ok, parse lỗi
+                    return response.json().then(errorData => {
+                        throw errorData;
+                    });
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.success) {
                     alert('Tạo vé thành công!');
@@ -255,7 +269,15 @@
                     alert('Lỗi: ' + data.message);
                 }
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                if (error.errors) {
+                    // Hiển thị lỗi validation
+                    displayErrors(error.errors);
+                } else {
+                    alert('Lỗi: ' + (error.message || 'Có lỗi xảy ra'));
+                }
+            });
         });
 
         // Các hàm tìm kiếm và thống kê
@@ -323,9 +345,6 @@
                         </td>
                         <td>${ve.NgayDat || 'N/A'}</td>
                         <td>
-                            <button class="btn btn-warning btn-sm" onclick="editVe(${ve.MaVe})">
-                                <i class="fas fa-edit"></i>
-                            </button>
                             <button class="btn btn-danger btn-sm" onclick="deleteVe(${ve.MaVe})">
                                 <i class="fas fa-trash"></i>
                             </button>
@@ -337,52 +356,6 @@
                     </tr>
                 `;
                 tbody.innerHTML += row;
-            });
-        }
-
-        // Sửa vé
-        function editVe(maVe) {
-            fetch(`/ve/${maVe}`)
-                .then(response => response.json())
-                .then(ve => {
-                    document.getElementById('editMaVe').value = ve.MaVe;
-                    document.getElementById('editMaSuatChieu').value = ve.MaSuatChieu;
-                    document.getElementById('editMaPhong').value = ve.MaPhong;
-                    document.getElementById('editSoGhe').value = ve.SoGhe;
-                    document.getElementById('editMaHoaDon').value = ve.MaHoaDon || '';
-                    document.getElementById('editGiaVe').value = ve.GiaVe;
-                    document.getElementById('editTrangThai').value = ve.TrangThai;
-                    
-                    new bootstrap.Modal(document.getElementById('editModal')).show();
-                });
-        }
-
-        function updateVe() {
-            const maVe = document.getElementById('editMaVe').value;
-            
-            fetch(`/ve/${maVe}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                },
-                body: JSON.stringify({
-                    MaSuatChieu: document.getElementById('editMaSuatChieu').value,
-                    MaPhong: document.getElementById('editMaPhong').value,
-                    SoGhe: document.getElementById('editSoGhe').value,
-                    MaHoaDon: document.getElementById('editMaHoaDon').value || null,
-                    GiaVe: document.getElementById('editGiaVe').value,
-                    TrangThai: document.getElementById('editTrangThai').value
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Cập nhật thành công!');
-                    location.reload();
-                } else {
-                    alert('Lỗi: ' + data.message);
-                }
             });
         }
 

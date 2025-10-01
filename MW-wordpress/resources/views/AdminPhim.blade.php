@@ -20,6 +20,9 @@
 </head>
 <body>
     <h1>Quản lý Phim</h1>
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                    </a>
 
     @if(session('success'))
         <div style="padding:8px;background:#e6ffed;border:1px solid #b7f0c8;margin-bottom:10px;">

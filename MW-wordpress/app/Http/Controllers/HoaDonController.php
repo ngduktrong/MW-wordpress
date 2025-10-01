@@ -20,13 +20,22 @@ class HoaDonController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'MaNhanVien' => 'nullable|integer|exists:NhanVien,MaNguoiDung',
-            'MaKhachHang' => 'nullable|integer|exists:KhachHang,MaNguoiDung',
-            'TongTien' => 'required|numeric|min:0',
-        ]);
+{
+    $request->validate([
+        'MaNhanVien' => 'nullable|integer|exists:NhanVien,MaNguoiDung',
+        'MaKhachHang' => 'nullable|integer|exists:KhachHang,MaNguoiDung',
+        'TongTien' => 'required|numeric|min:0',
+    ], [
+        'MaNhanVien.integer' => 'Mã nhân viên phải là số nguyên',
+        'MaNhanVien.exists' => 'Mã nhân viên không tồn tại trong hệ thống',
+        'MaKhachHang.integer' => 'Mã khách hàng phải là số nguyên',
+        'MaKhachHang.exists' => 'Mã khách hàng không tồn tại trong hệ thống',
+        'TongTien.required' => 'Tổng tiền không được để trống',
+        'TongTien.numeric' => 'Tổng tiền phải là số',
+        'TongTien.min' => 'Tổng tiền không được âm',
+    ]);
 
+    try {
         $hoadon = HoaDon::create($request->all());
         
         return response()->json([
@@ -34,6 +43,12 @@ class HoaDonController extends Controller
             'message' => 'Hóa đơn đã được tạo thành công',
             'MaHoaDon' => $hoadon->MaHoaDon
         ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Lỗi khi tạo hóa đơn: ' . $e->getMessage()
+        ], 500);
+    }
     }
 
     public function show($id)
@@ -44,23 +59,13 @@ class HoaDonController extends Controller
         return response()->json($hoadon);
     }
 
-    public function update(Request $request, $id)
-    {
-        $hoadon = HoaDon::findOrFail($id);
-        
-        $request->validate([
-            'MaNhanVien' => 'nullable|integer|exists:NhanVien,MaNguoiDung',
-            'MaKhachHang' => 'nullable|integer|exists:KhachHang,MaNguoiDung',
-            'TongTien' => 'required|numeric|min:0',
-        ]);
-
-        $hoadon->update($request->all());
-        
-        return response()->json([
-            'success' => true,
-            'message' => 'Hóa đơn đã được cập nhật'
-        ]);
-    }
+   public function update(Request $request, $id)
+{
+    return response()->json([
+        'success' => false,
+        'message' => 'Chức năng sửa hóa đơn đã bị vô hiệu hóa'
+    ], 405);
+}
 
     public function destroy($id)
     {

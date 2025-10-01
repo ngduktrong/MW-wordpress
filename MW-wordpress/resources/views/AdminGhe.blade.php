@@ -17,6 +17,9 @@
 <body>
 <div class="container py-4">
     <h1 class="text-center mb-4">Quản lý Ghế</h1>
+    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                    </a>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">

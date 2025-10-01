@@ -23,6 +23,9 @@
 <body>
 
 <h2>Quản lý Tài khoản</h2>
+<a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                    </a>
 
 @if(session('success'))
     <div style="padding:8px;background:#e6ffed;border:1px solid #b7f2c8;margin-bottom:12px;">

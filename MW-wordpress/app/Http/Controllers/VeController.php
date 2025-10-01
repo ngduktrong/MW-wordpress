@@ -20,15 +20,31 @@ class VeController extends Controller
     }
 
     public function store(Request $request)
-    {
-        $request->validate([
-            'MaSuatChieu' => 'required|integer|exists:SuatChieu,MaSuatChieu',
-            'MaPhong' => 'required|integer|exists:PhongChieu,MaPhong',
-            'SoGhe' => 'required|string|max:5',
-            'MaHoaDon' => 'nullable|integer|exists:HoaDon,MaHoaDon',
-            'GiaVe' => 'required|numeric|min:0',
-        ]);
+{
+    $request->validate([
+        'MaSuatChieu' => 'required|integer|exists:SuatChieu,MaSuatChieu',
+        'MaPhong' => 'required|integer|exists:PhongChieu,MaPhong',
+        'SoGhe' => 'required|string|max:5',
+        'MaHoaDon' => 'nullable|integer|exists:HoaDon,MaHoaDon',
+        'GiaVe' => 'required|numeric|min:0',
+    ], [
+        'MaSuatChieu.required' => 'Mã suất chiếu không được để trống',
+        'MaSuatChieu.integer' => 'Mã suất chiếu phải là số nguyên',
+        'MaSuatChieu.exists' => 'Mã suất chiếu không tồn tại trong hệ thống',
+        'MaPhong.required' => 'Mã phòng không được để trống',
+        'MaPhong.integer' => 'Mã phòng phải là số nguyên',
+        'MaPhong.exists' => 'Mã phòng không tồn tại trong hệ thống',
+        'SoGhe.required' => 'Số ghế không được để trống',
+        'SoGhe.string' => 'Số ghế phải là chuỗi ký tự',
+        'SoGhe.max' => 'Số ghế không được vượt quá 5 ký tự',
+        'MaHoaDon.integer' => 'Mã hóa đơn phải là số nguyên',
+        'MaHoaDon.exists' => 'Mã hóa đơn không tồn tại trong hệ thống',
+        'GiaVe.required' => 'Giá vé không được để trống',
+        'GiaVe.numeric' => 'Giá vé phải là số',
+        'GiaVe.min' => 'Giá vé không được âm',
+    ]);
 
+    try {
         // Kiểm tra trùng ghế
         $veTrung = Ve::where('MaSuatChieu', $request->MaSuatChieu)
                     ->where('SoGhe', $request->SoGhe)
@@ -47,7 +63,7 @@ class VeController extends Controller
             'SoGhe' => $request->SoGhe,
             'MaHoaDon' => $request->MaHoaDon,
             'GiaVe' => $request->GiaVe,
-            'TrangThai' => 'pending', // Mặc định "Chưa thanh toán"
+            'TrangThai' => 'pending',
             'NgayDat' => null
         ]);
 
@@ -56,6 +72,12 @@ class VeController extends Controller
             'message' => 'Vé đã được tạo thành công',
             've' => $ve
         ], 201);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Lỗi khi tạo vé: ' . $e->getMessage()
+        ], 500);
+    }
     }
 
     public function show($id)
@@ -68,44 +90,10 @@ class VeController extends Controller
 
     public function update(Request $request, $id)
     {
-        $ve = Ve::findOrFail($id);
-        
-        // Không cho sửa nếu vé đã thanh toán
-        if ($ve->TrangThai === 'paid') {
-            return response()->json([
-                'success' => false,
-                'message' => 'Không thể sửa vé đã thanh toán'
-            ], 422);
-        }
-
-        $request->validate([
-            'MaSuatChieu' => 'required|integer|exists:SuatChieu,MaSuatChieu',
-            'MaPhong' => 'required|integer|exists:PhongChieu,MaPhong',
-            'SoGhe' => 'required|string|max:5',
-            'MaHoaDon' => 'nullable|integer|exists:HoaDon,MaHoaDon',
-            'GiaVe' => 'required|numeric|min:0',
-            'TrangThai' => 'required|in:available,booked,paid,cancelled,pending',
-        ]);
-
-        // Kiểm tra trùng ghế (trừ vé hiện tại)
-        $veTrung = Ve::where('MaSuatChieu', $request->MaSuatChieu)
-                    ->where('SoGhe', $request->SoGhe)
-                    ->where('MaVe', '!=', $id)
-                    ->exists();
-        
-        if ($veTrung) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Ghế đã được đặt cho suất chiếu này'
-            ], 422);
-        }
-
-        $ve->update($request->all());
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Vé đã được cập nhật'
-        ]);
+    return response()->json([
+        'success' => false,
+        'message' => 'Chức năng sửa vé đã bị vô hiệu hóa'
+    ], 405);
     }
 
     public function destroy($id)

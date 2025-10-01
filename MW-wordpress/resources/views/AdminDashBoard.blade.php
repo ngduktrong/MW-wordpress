@@ -88,9 +88,9 @@
     <a href="{{ route('admin.phongchieu.index') }}">Phòng Chiếu</a>
     <a href="{{ route('admin.suatchieu.index') }}">Suất Chiếu</a>
     <a href="{{ route('ghe.index') }}">Ghế</a>
-    <a href="#">Vé</a>
-    <a href="#">Hóa Đơn</a>
-    <a href="#">Thông báo</a>
+    <a href="{{ route('admin.ve.index') }}">Vé</a>
+    <a href="{{ route('admin.hoadon.index') }}">Hóa Đơn</a>
+    <a href="{{ route('admin.kiemtra.index') }}">Thông báo</a>
     </nav>
     <main>
         <div class="welcome-section">

@@ -21,6 +21,9 @@
 <body>
     <div class="container mt-4">
         <h2 class="mb-4">Quản lý Phòng Chiếu</h2>
+        <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+                    </a>
         
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show" role="alert">
