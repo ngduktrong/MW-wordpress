@@ -42,25 +42,6 @@
             border-radius: 4px;
             box-sizing: border-box;
         }
-        .role-buttons {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .role-btn {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ddd;
-            background: #f9f9f9;
-            cursor: pointer;
-            text-align: center;
-            border-radius: 4px;
-        }
-        .role-btn.active {
-            background: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
         .login-btn {
             width: 100%;
             padding: 10px;
@@ -110,12 +91,6 @@
                 @enderror
             </div>
             
-            <div class="role-buttons">
-                <div class="role-btn active" data-role="admin">Admin</div>
-                <div class="role-btn" data-role="user">Khách Hàng</div>
-            </div>
-            <input type="hidden" name="LoaiTaiKhoan" id="LoaiTaiKhoan" value="admin">
-            
             <button type="submit" class="login-btn">Đăng nhập</button>
             
             <div class="register-link">
@@ -123,15 +98,5 @@
             </div>
         </form>
     </div>
-
-    <script>
-        document.querySelectorAll('.role-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.role-btn').forEach(b => b.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById('LoaiTaiKhoan').value = this.getAttribute('data-role');
-            });
-        });
-    </script>
 </body>
 </html>

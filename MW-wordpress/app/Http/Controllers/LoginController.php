@@ -19,17 +19,18 @@ class LoginController extends Controller
         $request->validate([
             'TenDangNhap' => 'required',
             'MatKhau' => 'required',
-            'LoaiTaiKhoan' => 'required|in:admin,user'
+            // ĐÃ XÓA: validation cho LoaiTaiKhoan
         ]);
 
-        $taiKhoan = TaiKhoan::where('TenDangNhap', $request->TenDangNhap)
-                           ->where('LoaiTaiKhoan', $request->LoaiTaiKhoan)
-                           ->first();
+        // CHỈ tìm theo tên đăng nhập, không tìm theo LoaiTaiKhoan nữa
+        $taiKhoan = TaiKhoan::where('TenDangNhap', $request->TenDangNhap)->first();
 
+        // Kiểm tra tài khoản tồn tại và mật khẩu đúng
         if ($taiKhoan && Hash::check($request->MatKhau, $taiKhoan->MatKhau)) {
             Auth::login($taiKhoan);
             
-            if ($request->LoaiTaiKhoan === 'admin') {
+            // Chuyển hướng dựa vào LoaiTaiKhoan trong database
+            if ($taiKhoan->LoaiTaiKhoan === 'admin') {
                 return redirect()->route('admin.dashboard');
             } else {
                 return redirect()->route('admin.phim');
@@ -37,7 +38,7 @@ class LoginController extends Controller
         }
 
         return back()->withErrors([
-            'TenDangNhap' => 'Thông tin đăng nhập không chính xác.',
+            'TenDangNhap' => 'Tên đăng nhập hoặc mật khẩu không chính xác.',
         ]);
     }
 
