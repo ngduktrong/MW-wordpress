@@ -5,138 +5,108 @@ namespace App\Http\Controllers;
 use App\Models\NhanVien;
 use App\Models\NguoiDung;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
-class NhanVienController extends Controller
+class NhanVienController extends BaseCrudController
 {
-    /**
-     * Danh sách nhân viên
-     */
+    protected $model = NhanVien::class;
+    protected $primaryKey = 'MaNguoiDung';
+
     public function index()
     {
-        $data = NhanVien::with('nguoiDung')->get();
-        return response()->json(['success' => true, 'data' => $data]);
+        $nhanViens = NhanVien::with('nguoiDung')->get();
+        return view('AdminNhanVien', compact('nhanViens'));
     }
 
-    /**
-     * Tạo nhân viên mới
-     * - Bắt buộc MaNguoiDung tồn tại ở bảng NguoiDung
-     * - Không cho phép MaNguoiDung trùng ở NhanVien
-     */
     public function store(Request $request)
     {
-        $input = $request->only(['MaNguoiDung', 'ChucVu', 'Luong', 'VaiTro']);
-        // trim nếu có
-        if (isset($input['MaNguoiDung'])) {
-            $input['MaNguoiDung'] = trim($input['MaNguoiDung']);
-        }
-
-        $rules = [
-            'MaNguoiDung' => [
-                'required',
-                // nếu mã thực sự là chuỗi (ví dụ NV001) bỏ integer
-                'integer',
-                Rule::exists('NguoiDung', 'MaNguoiDung'),
-                Rule::unique('NhanVien', 'MaNguoiDung')
-            ],
-            'ChucVu' => 'nullable|string|max:255',
-            'Luong' => 'nullable|numeric',
-            'VaiTro' => 'nullable|string|max:255',
-        ];
-
-        $messages = [
-            'MaNguoiDung.required' => 'Bạn chưa nhập Mã Người Dùng.',
-            'MaNguoiDung.integer' => 'Mã Người Dùng phải là số (nếu dùng chuỗi, chỉnh lại rule).',
-            'MaNguoiDung.exists' => 'Mã Người Dùng không tồn tại trong hệ thống (bảng Người Dùng).',
-            'MaNguoiDung.unique' => 'Mã Người Dùng đã được gán cho nhân viên khác.',
-        ];
-
-        $validator = Validator::make($input, $rules, $messages);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Lỗi validation',
-                'errors' => $validator->errors()
-            ], 422);
-        }
+        $data = $request->validate([
+            'MaNguoiDung' => 'required|exists:NguoiDung,MaNguoiDung|unique:NhanVien,MaNguoiDung',
+            'ChucVu' => 'required|string|max:50',
+            'Luong' => 'required|numeric|min:0',
+            'VaiTro' => 'required|in:Admin,QuanLy,ThuNgan,BanVe',
+        ]);
 
         try {
-            $nv = NhanVien::create($validator->validated());
-            return response()->json(['success' => true, 'data' => $nv], 201);
+            DB::transaction(function() use ($data) {
+                // Tạo nhân viên
+                NhanVien::create($data);
+                
+                // Cập nhật LoaiNguoiDung thành NhanVien
+                NguoiDung::where('MaNguoiDung', $data['MaNguoiDung'])
+                         ->update(['LoaiNguoiDung' => 'NhanVien']);
+            });
+
+            return response()->json(['success' => 'Thêm nhân viên thành công!'], 200);
         } catch (\Exception $e) {
-            Log::error('Error creating NhanVien: '.$e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Lỗi khi tạo nhân viên'], 500);
+            return response()->json(['error' => 'Lỗi khi thêm nhân viên: ' . $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Cập nhật nhân viên
-     * - ID ở đây là MaNguoiDung (khóa chính của bảng NhanVien)
-     */
     public function update(Request $request, $id)
     {
-        $input = $request->only(['ChucVu', 'Luong', 'VaiTro']);
-
-        $rules = [
-            'ChucVu' => 'nullable|string|max:255',
-            'Luong' => 'nullable|numeric',
-            'VaiTro' => 'nullable|string|max:255',
-        ];
-
-        $validator = Validator::make($input, $rules);
-
-        if ($validator->fails()) {
-            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
-        }
+        $data = $request->validate([
+            'ChucVu' => 'required|string|max:50',
+            'Luong' => 'required|numeric|min:0',
+            'VaiTro' => 'required|in:Admin,QuanLy,ThuNgan,BanVe',
+        ]);
 
         try {
-            $nv = NhanVien::find($id);
-            if (!$nv) {
-                return response()->json(['success' => false, 'message' => 'Không tìm thấy nhân viên.'], 404);
-            }
-            $nv->update($validator->validated());
-            return response()->json(['success' => true, 'data' => $nv]);
+            $nhanVien = NhanVien::findOrFail($id);
+            $nhanVien->update($data);
+
+            return response()->json(['success' => 'Cập nhật nhân viên thành công!'], 200);
         } catch (\Exception $e) {
-            Log::error('Error updating NhanVien: '.$e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Lỗi khi cập nhật nhân viên'], 500);
+            return response()->json(['error' => 'Lỗi khi cập nhật nhân viên: ' . $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Xóa nhân viên
-     */
     public function destroy($id)
     {
         try {
-            $nv = NhanVien::find($id);
-            if (!$nv) {
-                return response()->json(['success' => false, 'message' => 'Không tìm thấy nhân viên.'], 404);
-            }
-            $nv->delete();
-            return response()->json(['success' => true, 'message' => 'Đã xóa.']);
+            DB::transaction(function() use ($id) {
+                $nhanVien = NhanVien::findOrFail($id);
+                
+                // Xóa nhân viên
+                $nhanVien->delete();
+                
+                // Chuyển LoaiNguoiDung về KhachHang
+                NguoiDung::where('MaNguoiDung', $id)
+                         ->update(['LoaiNguoiDung' => 'KhachHang']);
+            });
+
+            return response()->json(['success' => 'Xóa nhân viên thành công!'], 200);
         } catch (\Exception $e) {
-            Log::error('Error deleting NhanVien: '.$e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Lỗi khi xóa nhân viên'], 500);
+            return response()->json(['error' => 'Lỗi khi xóa nhân viên: ' . $e->getMessage()], 500);
         }
     }
 
-    /**
-     * Lấy danh sách Người Dùng chưa có nhân viên (hữu ích cho tạo)
-     */
-    public function getNguoiDungChuaCoTaiKhoan()
+    public function edit($id)
     {
         try {
-            $nguoiDungDaCoNhanVien = NhanVien::pluck('MaNguoiDung')->toArray();
-            $nguoiDungChuaCo = NguoiDung::whereNotIn('MaNguoiDung', $nguoiDungDaCoNhanVien)
-                                        ->with('taiKhoan')
-                                        ->get();
-            return response()->json(['success' => true, 'data' => $nguoiDungChuaCo]);
+            $nhanVien = NhanVien::with('nguoiDung')->findOrFail($id);
+            return response()->json($nhanVien);
         } catch (\Exception $e) {
-            Log::error('Error getting nguoi dung: '.$e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Lỗi khi tải danh sách người dùng'], 500);
+            return response()->json(['error' => 'Không tìm thấy nhân viên'], 404);
+        }
+    }
+
+    public function checkMaNguoiDung($maNguoiDung)
+    {
+        try {
+            $exists = NguoiDung::where('MaNguoiDung', $maNguoiDung)->exists();
+            $isAlreadyEmployee = NhanVien::where('MaNguoiDung', $maNguoiDung)->exists();
+            
+            return response()->json([
+                'exists' => $exists,
+                'isAlreadyEmployee' => $isAlreadyEmployee
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'exists' => false,
+                'isAlreadyEmployee' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

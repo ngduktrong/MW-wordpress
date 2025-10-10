@@ -12,40 +12,27 @@ class PhongChieu extends Model
     protected $table = 'PhongChieu';
     protected $primaryKey = 'MaPhong';
     public $timestamps = false;
-    public $incrementing = true;
 
     protected $fillable = [
         'TenPhong',
         'SoLuongGhe',
-        'LoaiPhong'
-    ];
-
-    protected $casts = [
-        'MaPhong' => 'integer',
-        'SoLuongGhe' => 'integer'
+        'LoaiPhong',
     ];
 
     /**
-     * Mối quan hệ với bảng Ghe
+     * 1 Phòng chiếu có nhiều Suất chiếu
      */
-    public function ghes()
-    {
-        return $this->hasMany(Ghe::class, 'MaPhong', 'MaPhong');
-    }
-
-    /**
-     * Mối quan hệ với bảng SuatChieu
-     */
-    public function suatChieus()
+    public function suatChieu()
     {
         return $this->hasMany(SuatChieu::class, 'MaPhong', 'MaPhong');
     }
 
     /**
-     * Mối quan hệ với bảng Ve thông qua SuatChieu
+     * 1 Phòng chiếu có nhiều Ghế
      */
-    public function ves()
+    public function ghe()
     {
-        return $this->hasManyThrough(Ve::class, SuatChieu::class, 'MaPhong', 'MaSuatChieu', 'MaPhong', 'MaSuatChieu');
+        return $this->hasMany(Ghe::class, 'MaPhong', 'MaPhong');
     }
+
 }

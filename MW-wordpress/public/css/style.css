@@ -1,0 +1,28 @@
+.btn-shadow:hover{
+  background-color: rgb(39, 164, 227);
+   box-shadow:
+    0 4px 12px rgba(235, 14, 14, 0.7),     /* đỏ */
+    0 0 20px rgba(208, 250, 58, 0.6),      /* xanh lá */
+    0 0 30px rgba(14, 236, 236, 0.5);      /* vàng */
+}
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+a{
+  text-decoration: none;
+  color: black;
+}
+/* .btn:hover{
+    opacity: 0.5;
+} */
+
+footer {
+    background: transparent !important;
+    color: white !important;
+    position: relative;
+    z-index: 1;
+}

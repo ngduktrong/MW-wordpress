@@ -21,35 +21,55 @@ class HoaDonController extends Controller
 
     public function store(Request $request)
 {
-    $request->validate([
-        'MaNhanVien' => 'nullable|integer|exists:NhanVien,MaNguoiDung',
-        'MaKhachHang' => 'nullable|integer|exists:KhachHang,MaNguoiDung',
-        'TongTien' => 'required|numeric|min:0',
-    ], [
-        'MaNhanVien.integer' => 'Mã nhân viên phải là số nguyên',
-        'MaNhanVien.exists' => 'Mã nhân viên không tồn tại trong hệ thống',
-        'MaKhachHang.integer' => 'Mã khách hàng phải là số nguyên',
-        'MaKhachHang.exists' => 'Mã khách hàng không tồn tại trong hệ thống',
-        'TongTien.required' => 'Tổng tiền không được để trống',
-        'TongTien.numeric' => 'Tổng tiền phải là số',
-        'TongTien.min' => 'Tổng tiền không được âm',
-    ]);
-
     try {
-        $hoadon = HoaDon::create($request->all());
+        \Log::info('HoaDon Store Request:', $request->all());
+        
+        $request->validate([
+            'MaNhanVien' => 'nullable|exists:NhanVien,MaNguoiDung',
+            'MaKhachHang' => 'nullable|exists:KhachHang,MaNguoiDung',
+            'TongTien' => 'required|numeric|min:0',
+        ]);
+
+        $data = [
+            'TongTien' => $request->TongTien,
+            'NgayLap' => now(),
+        ];
+
+        // Chỉ thêm MaNhanVien nếu có giá trị
+        if ($request->has('MaNhanVien') && !empty($request->MaNhanVien)) {
+            $data['MaNhanVien'] = $request->MaNhanVien;
+        }
+
+        // Chỉ thêm MaKhachHang nếu có giá trị  
+        if ($request->has('MaKhachHang') && !empty($request->MaKhachHang)) {
+            $data['MaKhachHang'] = $request->MaKhachHang;
+        }
+
+        \Log::info('HoaDon Data to create:', $data);
+
+        $hoadon = HoaDon::create($data);
         
         return response()->json([
             'success' => true,
             'message' => 'Hóa đơn đã được tạo thành công',
             'MaHoaDon' => $hoadon->MaHoaDon
         ], 201);
-    } catch (\Exception $e) {
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation Error:', $e->errors());
         return response()->json([
             'success' => false,
-            'message' => 'Lỗi khi tạo hóa đơn: ' . $e->getMessage()
+            'message' => 'Lỗi validate',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        \Log::error('HoaDon Store Error:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Lỗi server: ' . $e->getMessage()
         ], 500);
     }
-    }
+}
 
     public function show($id)
     {

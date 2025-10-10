@@ -1,5 +1,4 @@
 <?php
-// app/Models/HoaDon.php
 
 namespace App\Models;
 
@@ -14,7 +13,6 @@ class HoaDon extends Model
     public $incrementing = true;
     protected $keyType = 'int';
 
-    // Schema dùng cột NgayLap DEFAULT CURRENT_TIMESTAMP, nên tắt timestamps của Eloquent
     public $timestamps = false;
 
     protected $fillable = [
@@ -25,14 +23,14 @@ class HoaDon extends Model
     ];
 
     protected $casts = [
-        'MaNhanVien' => 'integer',
+        'MaNhanVien'  => 'integer',
         'MaKhachHang' => 'integer',
-        'NgayLap' => 'datetime',
-        'TongTien' => 'decimal:2',
+        'NgayLap'     => 'datetime',
+        'TongTien'    => 'decimal:2',
     ];
 
     /**
-     * Nhân viên lập hóa đơn (nullable)
+     * Nhân viên lập hóa đơn
      * FK: HoaDon.MaNhanVien -> NhanVien.MaNguoiDung
      */
     public function nhanVien(): BelongsTo
@@ -41,7 +39,7 @@ class HoaDon extends Model
     }
 
     /**
-     * Khách hàng (nullable)
+     * Khách hàng mua hóa đơn
      * FK: HoaDon.MaKhachHang -> KhachHang.MaNguoiDung
      */
     public function khachHang(): BelongsTo
@@ -50,8 +48,7 @@ class HoaDon extends Model
     }
 
     /**
-     * Các vé liên quan tới hóa đơn này
-     * FK: Ve.MaHoaDon -> HoaDon.MaHoaDon
+     * Các vé liên quan tới hóa đơn
      */
     public function ves(): HasMany
     {

@@ -12,7 +12,6 @@ class SuatChieu extends Model
     protected $table = 'SuatChieu';
     protected $primaryKey = 'MaSuatChieu';
     public $timestamps = false;
-    public $incrementing = true;
 
     protected $fillable = [
         'MaPhim',
@@ -21,14 +20,11 @@ class SuatChieu extends Model
     ];
 
     protected $casts = [
-        'MaSuatChieu' => 'integer',
-        'MaPhim' => 'integer',
-        'MaPhong' => 'integer',
         'NgayGioChieu' => 'datetime'
     ];
 
     /**
-     * Mối quan hệ với bảng Phim
+     * Suất chiếu thuộc về 1 Phim
      */
     public function phim()
     {
@@ -36,7 +32,7 @@ class SuatChieu extends Model
     }
 
     /**
-     * Mối quan hệ với bảng PhongChieu
+     * Suất chiếu diễn ra trong 1 Phòng chiếu
      */
     public function phongChieu()
     {
@@ -44,7 +40,7 @@ class SuatChieu extends Model
     }
 
     /**
-     * Mối quan hệ với bảng Ve
+     * Suất chiếu có nhiều Vé
      */
     public function ves()
     {

@@ -2,36 +2,53 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class NhanVien extends Model
 {
-    // Bảng NhanVien dùng MaNguoiDung làm khóa chính (foreign key đến NguoiDung)
+    use HasFactory;
+
+    // Tên bảng
     protected $table = 'NhanVien';
+
+    // Khóa chính
     protected $primaryKey = 'MaNguoiDung';
-    public $incrementing = false; // nếu MaNguoiDung không tự tăng
-    protected $keyType = 'int'; // đổi sang 'string' nếu mã là chuỗi
+
+    // Không tự động tăng (vì là FK từ NguoiDung)
+    public $incrementing = false;
+
+    // Kiểu khóa chính
+    protected $keyType = 'int';
+
+    // Tắt timestamps (vì bảng không có created_at / updated_at)
     public $timestamps = false;
 
-    // Cho phép gán hàng loạt cho các trường này
+    // Các cột có thể gán
     protected $fillable = [
         'MaNguoiDung',
         'ChucVu',
         'Luong',
-        'VaiTro'
+        'VaiTro',
     ];
 
-    protected $casts = [
-        'Luong' => 'float',
-        'MaNguoiDung' => 'int',
-    ];
+    // ============================
+    // QUAN HỆ (RELATIONSHIPS)
+    // ============================
 
     /**
-     * Quan hệ tới bảng NguoiDung
+     * Mỗi nhân viên thuộc về một người dùng.
      */
-    public function nguoiDung(): BelongsTo
+    public function nguoiDung()
     {
         return $this->belongsTo(NguoiDung::class, 'MaNguoiDung', 'MaNguoiDung');
+    }
+
+    /**
+     * Mỗi nhân viên có thể lập nhiều hóa đơn.
+     */
+    public function hoaDons()
+    {
+        return $this->hasMany(HoaDon::class, 'MaNhanVien', 'MaNguoiDung');
     }
 }

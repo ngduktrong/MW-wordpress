@@ -19,32 +19,19 @@ class VeController extends Controller
         return view('AdminVe', compact('ves'));
     }
 
-    public function store(Request $request)
+   public function store(Request $request)
 {
-    $request->validate([
-        'MaSuatChieu' => 'required|integer|exists:SuatChieu,MaSuatChieu',
-        'MaPhong' => 'required|integer|exists:PhongChieu,MaPhong',
-        'SoGhe' => 'required|string|max:5',
-        'MaHoaDon' => 'nullable|integer|exists:HoaDon,MaHoaDon',
-        'GiaVe' => 'required|numeric|min:0',
-    ], [
-        'MaSuatChieu.required' => 'Mã suất chiếu không được để trống',
-        'MaSuatChieu.integer' => 'Mã suất chiếu phải là số nguyên',
-        'MaSuatChieu.exists' => 'Mã suất chiếu không tồn tại trong hệ thống',
-        'MaPhong.required' => 'Mã phòng không được để trống',
-        'MaPhong.integer' => 'Mã phòng phải là số nguyên',
-        'MaPhong.exists' => 'Mã phòng không tồn tại trong hệ thống',
-        'SoGhe.required' => 'Số ghế không được để trống',
-        'SoGhe.string' => 'Số ghế phải là chuỗi ký tự',
-        'SoGhe.max' => 'Số ghế không được vượt quá 5 ký tự',
-        'MaHoaDon.integer' => 'Mã hóa đơn phải là số nguyên',
-        'MaHoaDon.exists' => 'Mã hóa đơn không tồn tại trong hệ thống',
-        'GiaVe.required' => 'Giá vé không được để trống',
-        'GiaVe.numeric' => 'Giá vé phải là số',
-        'GiaVe.min' => 'Giá vé không được âm',
-    ]);
-
     try {
+        \Log::info('Ve Store Request:', $request->all());
+        
+        $request->validate([
+            'MaSuatChieu' => 'required|integer|exists:SuatChieu,MaSuatChieu',
+            'MaPhong' => 'required|integer|exists:PhongChieu,MaPhong',
+            'SoGhe' => 'required|string|max:5',
+            'MaHoaDon' => 'nullable|integer|exists:HoaDon,MaHoaDon',
+            'GiaVe' => 'required|numeric|min:0',
+        ]);
+
         // Kiểm tra trùng ghế
         $veTrung = Ve::where('MaSuatChieu', $request->MaSuatChieu)
                     ->where('SoGhe', $request->SoGhe)
@@ -57,28 +44,45 @@ class VeController extends Controller
             ], 422);
         }
 
-        $ve = Ve::create([
+        $veData = [
             'MaSuatChieu' => $request->MaSuatChieu,
             'MaPhong' => $request->MaPhong,
             'SoGhe' => $request->SoGhe,
-            'MaHoaDon' => $request->MaHoaDon,
             'GiaVe' => $request->GiaVe,
             'TrangThai' => 'pending',
             'NgayDat' => null
-        ]);
+        ];
+
+        if ($request->has('MaHoaDon') && !empty($request->MaHoaDon)) {
+            $veData['MaHoaDon'] = $request->MaHoaDon;
+        }
+
+        \Log::info('Ve Data to create:', $veData);
+
+        $ve = Ve::create($veData);
 
         return response()->json([
             'success' => true,
             'message' => 'Vé đã được tạo thành công',
             've' => $ve
         ], 201);
-    } catch (\Exception $e) {
+
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        \Log::error('Validation Error:', $e->errors());
         return response()->json([
             'success' => false,
-            'message' => 'Lỗi khi tạo vé: ' . $e->getMessage()
+            'message' => 'Lỗi validate dữ liệu',
+            'errors' => $e->errors()
+        ], 422);
+    } catch (\Exception $e) {
+        \Log::error('Ve Store Error:', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
+        return response()->json([
+            'success' => false,
+            'message' => 'Lỗi server: ' . $e->getMessage()
         ], 500);
     }
-    }
+}
+
 
     public function show($id)
     {

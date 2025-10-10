@@ -6,8 +6,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use App\Models\TaiKhoan;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class LoginController extends Controller
+class LoginController extends Authenticatable
 {
     public function showLoginForm()
     {
@@ -33,7 +34,7 @@ class LoginController extends Controller
             if ($taiKhoan->LoaiTaiKhoan === 'admin') {
                 return redirect()->route('admin.dashboard');
             } else {
-                return redirect()->route('admin.phim');
+                return redirect()->route('home');
             }
         }
 
