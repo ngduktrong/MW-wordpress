@@ -20,7 +20,7 @@
 </head>
 <body>
     <h1>Quản lý Phim</h1>
-    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+     <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> Quay lại Dashboard
                     </a>
 
@@ -143,79 +143,86 @@
         </tbody>
     </table>
 
-    <script>
-        (function(){
-            const form = document.getElementById('phimForm');
-            const methodOverrideDiv = document.getElementById('methodOverride');
-            const submitBtn = document.getElementById('submitBtn');
-            const cancelEditBtn = document.getElementById('cancelEditBtn');
-            const formTitle = document.getElementById('formTitle');
+   <script>
+    (function(){
+        const form = document.getElementById('phimForm');
+        const methodOverrideDiv = document.getElementById('methodOverride');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const formTitle = document.getElementById('formTitle');
 
-            // inputs
-            const TenPhim = document.getElementById('TenPhim');
-            const ThoiLuong = document.getElementById('ThoiLuong');
-            const NgayKhoiChieu = document.getElementById('NgayKhoiChieu');
-            const NuocSanXuat = document.getElementById('NuocSanXuat');
-            const DinhDang = document.getElementById('DinhDang');
-            const MoTa = document.getElementById('MoTa');
-            const DaoDien = document.getElementById('DaoDien');
-            const DuongDanPoster = document.getElementById('DuongDanPoster');
+        // inputs
+        const TenPhim = document.getElementById('TenPhim');
+        const ThoiLuong = document.getElementById('ThoiLuong');
+        const NgayKhoiChieu = document.getElementById('NgayKhoiChieu');
+        const NuocSanXuat = document.getElementById('NuocSanXuat');
+        const DinhDang = document.getElementById('DinhDang');
+        const MoTa = document.getElementById('MoTa');
+        const DaoDien = document.getElementById('DaoDien');
+        const DuongDanPoster = document.getElementById('DuongDanPoster');
 
-            let editId = null;
-            const adminUrl = "{{ route('admin.phim') }}"; // thường /admin/phim
+        let editId = null;
+        const adminUrl = "{{ route('admin.phim') }}"; // thường /admin/phim
 
-            // Khôi phục form về trạng thái Thêm
-            function resetFormToCreate() {
-                editId = null;
-                form.action = "{{ route('phim.store') }}";
-                methodOverrideDiv.innerHTML = ''; // remove _method input
-                submitBtn.textContent = 'Thêm';
-                cancelEditBtn.style.display = 'none';
-                formTitle.textContent = 'Thêm Phim';
-                form.reset();
-            }
+        // Khôi phục form về trạng thái Thêm
+        function resetFormToCreate() {
+            editId = null;
+            form.action = "{{ route('phim.store') }}";
+            methodOverrideDiv.innerHTML = ''; // remove _method input
+            submitBtn.textContent = 'Thêm';
+            cancelEditBtn.style.display = 'none';
+            formTitle.textContent = 'Thêm Phim';
+            form.reset();
+            
+            // Thêm code để set min date là ngày hiện tại (không cho chọn ngày quá khứ)
+            const today = new Date().toISOString().split('T')[0];
+            NgayKhoiChieu.setAttribute('min', today);
+        }
 
-            // Điền dữ liệu vào form để sửa
-            function fillFormFromRow(tr) {
-                editId = tr.getAttribute('data-id');
-                TenPhim.value = tr.getAttribute('data-ten') || '';
-                ThoiLuong.value = tr.getAttribute('data-thoi') || '';
-                NgayKhoiChieu.value = tr.getAttribute('data-ngay') || '';
-                NuocSanXuat.value = tr.getAttribute('data-nuoc') || '';
-                DinhDang.value = tr.getAttribute('data-dinh') || '';
-                MoTa.value = tr.getAttribute('data-mota') || '';
-                DaoDien.value = tr.getAttribute('data-dao') || '';
-                DuongDanPoster.value = tr.getAttribute('data-poster') || '';
+        // Điền dữ liệu vào form để sửa
+        function fillFormFromRow(tr) {
+            editId = tr.getAttribute('data-id');
+            TenPhim.value = tr.getAttribute('data-ten') || '';
+            ThoiLuong.value = tr.getAttribute('data-thoi') || '';
+            NgayKhoiChieu.value = tr.getAttribute('data-ngay') || '';
+            NuocSanXuat.value = tr.getAttribute('data-nuoc') || '';
+            DinhDang.value = tr.getAttribute('data-dinh') || '';
+            MoTa.value = tr.getAttribute('data-mota') || '';
+            DaoDien.value = tr.getAttribute('data-dao') || '';
+            DuongDanPoster.value = tr.getAttribute('data-poster') || '';
 
-                // set form action to update route
-                // route('phim.update', id) => /phim/{id}
-                form.action = '/phim/' + editId;
+            // set form action to update route
+            // route('phim.update', id) => /phim/{id}
+            form.action = "{{ route('phim.update', ':id') }}".replace(':id', editId);
 
-                // add method override _method=PUT if not exists
-                methodOverrideDiv.innerHTML = '<input type="hidden" name="_method" value="PUT">';
-                submitBtn.textContent = 'Cập nhật';
-                cancelEditBtn.style.display = 'inline-block';
-                formTitle.textContent = 'Sửa Phim (ID: ' + editId + ')';
-            }
+            // add method override _method=PUT if not exists
+            methodOverrideDiv.innerHTML = '<input type="hidden" name="_method" value="PUT">';
+            submitBtn.textContent = 'Cập nhật';
+            cancelEditBtn.style.display = 'inline-block';
+            formTitle.textContent = 'Sửa Phim (ID: ' + editId + ')';
+            
+            // Xóa restriction min date khi edit (cho phép chọn ngày quá khứ khi sửa)
+            NgayKhoiChieu.removeAttribute('min');
+        }
 
-            // Attach click events to Edit buttons
-            document.querySelectorAll('.btn-edit').forEach(btn => {
-                btn.addEventListener('click', function(e){
-                    const row = this.closest('tr');
-                    fillFormFromRow(row);
-                    // scroll to form
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                });
+        // Attach click events to Edit buttons
+        document.querySelectorAll('.btn-edit').forEach(btn => {
+            btn.addEventListener('click', function(e){
+                const row = this.closest('tr');
+                fillFormFromRow(row);
+                // scroll to form
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
+        });
 
-            // Cancel edit
-            cancelEditBtn.addEventListener('click', function(){
-                resetFormToCreate();
-            });
-
-            // On page load ensure form is in create mode
+        // Cancel edit
+        cancelEditBtn.addEventListener('click', function(){
             resetFormToCreate();
-        })();
-    </script>
+        });
+
+        // On page load ensure form is in create mode
+        resetFormToCreate();
+    })();
+</script>
 </body>
 </html>

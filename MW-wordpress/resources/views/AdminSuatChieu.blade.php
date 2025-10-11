@@ -14,7 +14,19 @@
             background-color: #fff3cd;
         }
         #formTitle {
-            color: "{{ isset($suatChieu) ? '#dc3545' : '#0d6efd' }}";
+            color: {{ isset($suatChieu) ? '#dc3545' : '#0d6efd' }};
+        }
+        .alert-info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
+        }
+        .is-invalid {
+            border-color: #dc3545;
+        }
+        .invalid-feedback {
+            display: block;
+            color: #dc3545;
         }
     </style>
 </head>
@@ -22,12 +34,26 @@
     <div class="container mt-4">
         <h2 class="mb-4">Quản lý Suất Chiếu</h2>
         <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
-                    </a>
+            <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+        </a>
         
         @if(session('success'))
-            <div class="alert alert-success alert-dismissible fade show" role="alert">
-                {{ session('success') }}
+            <div class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                <i class="fas fa-check-circle"></i> {{ session('success') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if(session('info'))
+            <div class="alert alert-info alert-dismissible fade show mt-3" role="alert">
+                <i class="fas fa-info-circle"></i> {{ session('info') }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+                <i class="fas fa-exclamation-triangle"></i> Vui lòng kiểm tra lại thông tin nhập vào.
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         @endif
@@ -49,33 +75,46 @@
                     @endif
                     
                     <div class="mb-3">
-                        <label for="MaPhim" class="form-label">Phim</label>
-                        <select class="form-select" id="MaPhim" name="MaPhim" required>
+                        <label for="MaPhim" class="form-label">Phim <span class="text-danger">*</span></label>
+                        <select class="form-select @error('MaPhim') is-invalid @enderror" id="MaPhim" name="MaPhim" required>
                             <option value="">Chọn phim</option>
                             @foreach($phims as $phim)
-                                <option value="{{ $phim->MaPhim }}" {{ (isset($suatChieu) && $suatChieu->MaPhim == $phim->MaPhim) ? 'selected' : '' }}>
-                                    {{ $phim->TenPhim }}
+                                <option value="{{ $phim->MaPhim }}" 
+                                    {{ (isset($suatChieu) && $suatChieu->MaPhim == $phim->MaPhim) ? 'selected' : (old('MaPhim') == $phim->MaPhim ? 'selected' : '') }}>
+                                    {{ $phim->TenPhim }} ({{ $phim->ThoiLuong }} phút)
                                 </option>
                             @endforeach
                         </select>
+                        @error('MaPhim')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <div class="mb-3">
-                        <label for="MaPhong" class="form-label">Phòng Chiếu</label>
-                        <select class="form-select" id="MaPhong" name="MaPhong" required>
+                        <label for="MaPhong" class="form-label">Phòng Chiếu <span class="text-danger">*</span></label>
+                        <select class="form-select @error('MaPhong') is-invalid @enderror" id="MaPhong" name="MaPhong" required>
                             <option value="">Chọn phòng chiếu</option>
                             @foreach($phongChieus as $phong)
-                                <option value="{{ $phong->MaPhong }}" {{ (isset($suatChieu) && $suatChieu->MaPhong == $phong->MaPhong) ? 'selected' : '' }}>
+                                <option value="{{ $phong->MaPhong }}" 
+                                    {{ (isset($suatChieu) && $suatChieu->MaPhong == $phong->MaPhong) ? 'selected' : (old('MaPhong') == $phong->MaPhong ? 'selected' : '') }}>
                                     {{ $phong->TenPhong }} ({{ $phong->LoaiPhong }})
                                 </option>
                             @endforeach
                         </select>
+                        @error('MaPhong')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <div class="mb-3">
-                        <label for="NgayGioChieu" class="form-label">Ngày và Giờ Chiếu</label>
-                        <input type="datetime-local" class="form-control" id="NgayGioChieu" name="NgayGioChieu" 
-                               value="{{ isset($suatChieu) ? date('Y-m-d\TH:i', strtotime($suatChieu->NgayGioChieu)) : old('NgayGioChieu') }}" required>
+                        <label for="NgayGioChieu" class="form-label">Ngày và Giờ Chiếu <span class="text-danger">*</span></label>
+                        <input type="datetime-local" class="form-control @error('NgayGioChieu') is-invalid @enderror" 
+                               id="NgayGioChieu" name="NgayGioChieu" 
+                               value="{{ isset($suatChieu) ? date('Y-m-d\TH:i', strtotime($suatChieu->NgayGioChieu)) : old('NgayGioChieu') }}" 
+                               required>
+                        @error('NgayGioChieu')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
                     </div>
                     
                     <button type="submit" class="btn btn-primary">
@@ -146,6 +185,29 @@
                 document.getElementById('formContainer').scrollIntoView({ behavior: 'smooth' });
                 document.getElementById('formContainer').classList.add('edit-mode');
             }
+
+            // Hiển thị cảnh báo nếu chọn thời gian trong quá khứ
+            document.getElementById('NgayGioChieu').addEventListener('change', function() {
+                const selectedDate = new Date(this.value);
+                const now = new Date();
+                if (selectedDate < now) {
+                    this.classList.add('is-invalid');
+                    // Tạo thông báo lỗi nếu chưa có
+                    if (!this.nextElementSibling || !this.nextElementSibling.classList.contains('invalid-feedback')) {
+                        const errorDiv = document.createElement('div');
+                        errorDiv.className = 'invalid-feedback';
+                        errorDiv.textContent = 'Thời gian chiếu không được trong quá khứ.';
+                        this.parentNode.appendChild(errorDiv);
+                    }
+                } else {
+                    this.classList.remove('is-invalid');
+                    // Xóa thông báo lỗi nếu có
+                    const errorDiv = this.nextElementSibling;
+                    if (errorDiv && errorDiv.classList.contains('invalid-feedback')) {
+                        errorDiv.remove();
+                    }
+                }
+            });
         });
     </script>
 </body>

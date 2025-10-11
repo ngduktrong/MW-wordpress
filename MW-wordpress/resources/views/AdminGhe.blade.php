@@ -17,9 +17,9 @@
 <body>
 <div class="container py-4">
     <h1 class="text-center mb-4">Quản lý Ghế</h1>
-    <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
-                    </a>
+     <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary mb-3">
+        <i class="fas fa-arrow-left"></i> Quay lại Dashboard
+     </a>
 
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show" role="alert">
@@ -37,10 +37,10 @@
     @endif
 
     <div class="form-section">
-        <h3>{{ $editingGhe ? 'Sửa Ghế' : 'Thêm Ghế' }}</h3>
-        <form method="POST" action="{{ $editingGhe ? route('ghe.update', [$editingGhe->MaPhong, $editingGhe->SoGhe]) : route('ghe.store') }}">
+        <h3>{{ isset($editingGhe) && $editingGhe ? 'Sửa Ghế' : 'Thêm Ghế' }}</h3>
+        <form method="POST" action="{{ isset($editingGhe) && $editingGhe ? route('ghe.update', [$editingGhe->MaPhong, $editingGhe->SoGhe]) : route('ghe.store') }}">
             @csrf
-            @if($editingGhe)
+            @if(isset($editingGhe) && $editingGhe)
                 @method('PUT')
             @else
                 <input type="hidden" name="mode" value="single">
@@ -49,25 +49,38 @@
             <div class="row mb-3">
                 <div class="col-md-4">
                     <label for="MaPhong" class="form-label">Phòng</label>
-                    <select class="form-select" name="MaPhong" required {{ $editingGhe ? 'disabled' : '' }}>
+                    <select class="form-select" name="MaPhong" required {{ (isset($editingGhe) && $editingGhe) ? 'disabled' : '' }}>
                         <option value="">Chọn phòng</option>
                         @foreach($phongChieus as $phong)
-                            <option value="{{ $phong->MaPhong }}" {{ ($editingGhe && $editingGhe->MaPhong == $phong->MaPhong) ? 'selected' : (old('MaPhong') == $phong->MaPhong ? 'selected' : '') }}>
+                            <option value="{{ $phong->MaPhong }}"
+                                {{ (isset($editingGhe) && $editingGhe && $editingGhe->MaPhong == $phong->MaPhong) ? 'selected' : (old('MaPhong') == $phong->MaPhong ? 'selected' : '') }}>
                                 {{ $phong->TenPhong }} ({{ $phong->SoLuongGhe }} ghế)
                             </option>
                         @endforeach
                     </select>
-                    @if($editingGhe) <input type="hidden" name="MaPhong" value="{{ $editingGhe->MaPhong }}"> @endif
+                    @if(isset($editingGhe) && $editingGhe)
+                        <input type="hidden" name="MaPhong" value="{{ $editingGhe->MaPhong }}">
+                    @endif
                 </div>
-                
+
                 <div class="col-md-4">
                     <label for="SoGhe" class="form-label">Số Ghế</label>
-                    <input type="text" class="form-control" name="SoGhe" value="{{ $editingGhe ? $editingGhe->SoGhe : old('SoGhe') }}" required>
+                    <input type="text"
+                           class="form-control @error('SoGhe') is-invalid @enderror"
+                           name="SoGhe"
+                           value="{{ old('SoGhe', isset($editingGhe) && $editingGhe ? $editingGhe->SoGhe : '') }}"
+                           required
+                           maxlength="5"
+                           pattern="^[A-Z][A-Za-z0-9]{0,4}$"
+                           title="Mã ghế phải bắt đầu bằng chữ in hoa (A-Z), chỉ chứa chữ/số, tối đa 5 ký tự. Ví dụ: A01, B10">
+                    @error('SoGhe')
+                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                    @enderror
                 </div>
-                
+
                 <div class="col-md-4 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary me-2">{{ $editingGhe ? 'Cập nhật' : 'Thêm' }}</button>
-                    @if($editingGhe)
+                    <button type="submit" class="btn btn-primary me-2">{{ isset($editingGhe) && $editingGhe ? 'Cập nhật' : 'Thêm' }}</button>
+                    @if(isset($editingGhe) && $editingGhe)
                         <a href="{{ route('ghe.index') }}" class="btn btn-secondary">Hủy</a>
                     @endif
                 </div>
@@ -75,7 +88,7 @@
         </form>
 
         <hr>
-        
+
         <h4>Thêm hàng loạt</h4>
         <form method="POST" action="{{ route('ghe.store') }}">
             @csrf
@@ -91,17 +104,17 @@
                         @endforeach
                     </select>
                 </div>
-                
+
                 <div class="col-md-2">
                     <label class="form-label">Số lượng</label>
                     <input type="number" class="form-control" name="quantity" min="1" value="{{ old('quantity') }}">
                 </div>
-                
+
                 <div class="col-md-2">
                     <label class="form-label">Ghế/hàng</label>
                     <input type="number" class="form-control" name="seats_per_row" min="1" max="99" value="{{ old('seats_per_row', 10) }}">
                 </div>
-                
+
                 <div class="col-md-3 d-flex align-items-end">
                     <button type="submit" class="btn btn-info" name="mode" value="bulk">Thêm hàng loạt</button>
                 </div>
@@ -124,9 +137,9 @@
             @forelse($ghes as $ghe)
                 <tr>
                     <td>{{ $ghe->MaPhong }}</td>
-                    <td>{{ $ghe->phongChieu->TenPhong }}</td>
+                    <td>{{ optional($ghe->phongChieu)->TenPhong }}</td>
                     <td>{{ $ghe->SoGhe }}</td>
-                    <td>{{ $ghe->phongChieu->LoaiPhong }}</td>
+                    <td>{{ optional($ghe->phongChieu)->LoaiPhong }}</td>
                     <td class="action-buttons">
                         <a href="{{ route('ghe.edit', [$ghe->MaPhong, $ghe->SoGhe]) }}" class="btn btn-sm btn-warning">
                             <i class="fas fa-edit"></i> Sửa

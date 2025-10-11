@@ -23,7 +23,7 @@
 <body>
 
 <h2>Quản lý Tài khoản</h2>
-<a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
+ <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> Quay lại Dashboard
                     </a>
 
