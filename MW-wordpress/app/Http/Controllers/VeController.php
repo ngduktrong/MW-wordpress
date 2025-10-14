@@ -26,11 +26,15 @@ class VeController extends Controller
         
         $request->validate([
             'MaSuatChieu' => 'required|integer|exists:SuatChieu,MaSuatChieu',
-            'MaPhong' => 'required|integer|exists:PhongChieu,MaPhong',
+            // Loại bỏ validate MaPhong vì sẽ tự động lấy từ suất chiếu
             'SoGhe' => 'required|string|max:5',
             'MaHoaDon' => 'nullable|integer|exists:HoaDon,MaHoaDon',
             'GiaVe' => 'required|numeric|min:0',
         ]);
+
+        // Lấy thông tin suất chiếu để lấy mã phòng
+        $suatChieu = \App\Models\SuatChieu::findOrFail($request->MaSuatChieu);
+        $maPhong = $suatChieu->MaPhong;
 
         // Kiểm tra trùng ghế
         $veTrung = Ve::where('MaSuatChieu', $request->MaSuatChieu)
@@ -46,7 +50,7 @@ class VeController extends Controller
 
         $veData = [
             'MaSuatChieu' => $request->MaSuatChieu,
-            'MaPhong' => $request->MaPhong,
+            'MaPhong' => $maPhong, // Lấy từ suất chiếu thay vì từ request
             'SoGhe' => $request->SoGhe,
             'GiaVe' => $request->GiaVe,
             'TrangThai' => 'pending',

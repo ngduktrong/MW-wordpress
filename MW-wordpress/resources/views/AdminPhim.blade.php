@@ -5,18 +5,274 @@
     <title>Quản lý Phim</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <style>
-        body { font-family: Arial, sans-serif; padding: 16px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 16px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
-        th { background: #f4f4f4; }
-        input[type="text"], input[type="number"], input[type="date"], textarea { width: 100%; padding: 6px; box-sizing: border-box; }
-        .form-row { display: grid; grid-template-columns: 160px 1fr; gap: 8px; margin-bottom: 8px; align-items: center; }
-        .actions { display:flex; gap:8px; align-items:center; }
-        .btn { padding: 6px 10px; cursor:pointer; }
-        .btn-danger { background:#e74c3c; color:white; border:none; }
-        .btn-primary { background:#3498db; color:white; border:none; }
-        .btn-secondary { background:#95a5a6; color:white; border:none; }
-    </style>
+    /* Tông màu chủ đạo đen trắng cổ điển */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #7f8c8d;
+        --light-color: #ecf0f1;
+        --dark-color: #2c3e50;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --danger-color: #e74c3c;
+        --border-color: #dce1e5;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header và tiêu đề */
+    h1 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--accent-color);
+    }
+
+    h2 {
+        color: var(--secondary-color);
+        font-weight: 500;
+        margin-bottom: 1.2rem;
+    }
+
+    /* Nút quay lại Dashboard */
+    .btn-outline-secondary {
+        display: inline-block;
+        padding: 0.5rem 1.2rem;
+        border: 1px solid var(--accent-color);
+        color: var(--secondary-color);
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        background: white;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--secondary-color);
+        color: white;
+        border-color: var(--secondary-color);
+        text-decoration: none;
+    }
+
+    /* Success message */
+    [style*="background:#e6ffed"] {
+        background: #d4edda !important;
+        border: 1px solid #c3e6cb !important;
+        color: #155724;
+        padding: 12px 15px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+
+    /* Form container */
+    #formBox {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-color);
+    }
+
+    /* Form elements */
+    .form-row {
+        display: grid;
+        grid-template-columns: 160px 1fr;
+        gap: 12px;
+        margin-bottom: 1rem;
+        align-items: center;
+    }
+
+    label {
+        font-weight: 500;
+        color: var(--secondary-color);
+        text-align: right;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    input[type="date"],
+    textarea {
+        padding: 0.6rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus,
+    input[type="date"]:focus,
+    textarea:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0.2rem rgba(127, 140, 141, 0.25);
+        outline: none;
+    }
+
+    textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+
+    /* Button styling */
+    .btn {
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background-color: #1a252f;
+    }
+
+    .btn-secondary {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    .btn-secondary:hover {
+        background-color: #6c7a7d;
+    }
+
+    .btn-danger {
+        background-color: var(--danger-color);
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+
+    /* Table styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    th, td {
+        border: 1px solid var(--border-color);
+        padding: 0.85rem 0.75rem;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
+        border-color: var(--primary-color);
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Actions column */
+    .actions {
+        display: flex;
+        gap: 8px;
+        align-items: center;
+    }
+
+    .actions .btn {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.875rem;
+    }
+
+    .actions form {
+        margin: 0;
+    }
+
+    /* Empty state */
+    td[colspan] {
+        text-align: center;
+        color: var(--accent-color);
+        font-style: italic;
+        padding: 2rem !important;
+    }
+
+    /* Form buttons container */
+    [style*="margin-top:8px"] {
+        margin-top: 1.5rem !important;
+        display: flex;
+        gap: 10px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        body {
+            padding: 15px;
+        }
+        
+        #formBox {
+            padding: 15px;
+        }
+        
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0.5rem;
+            text-align: left;
+        }
+        
+        label {
+            text-align: left;
+        }
+        
+        table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .actions {
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .actions .btn {
+            width: 100%;
+        }
+    }
+
+    
+    .btn:focus,
+    input:focus,
+    textarea:focus {
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+    }
+</style>
 </head>
 <body>
     <h1>Quản lý Phim</h1>

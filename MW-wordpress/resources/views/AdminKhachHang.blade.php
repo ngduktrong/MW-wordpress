@@ -4,27 +4,306 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>Quản trị Khách hàng</title>
+    <title>Quản Lý Khách hàng</title>
     <style>
-        /* nhỏ gọn cho demo */
-        .error { color: red; }
-        .success { color: green; }
-        .hidden { display: none; }
-        form > div { margin-bottom: 8px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        .actions button { margin-right: 5px; }
-        .form-section { background: #f9f9f9; padding: 15px; border-radius: 5px; margin-bottom: 20px; }
-        .loading { opacity: 0.6; pointer-events: none; }
-        #loading { position: fixed; top: 20px; right: 20px; background: #007bff; color: white; padding: 10px; border-radius: 5px; z-index: 1000; }
-        .pagination { margin-top: 20px; text-align: center; }
-        .pagination a, .pagination span { padding: 8px 16px; margin: 0 4px; border: 1px solid #ddd; text-decoration: none; color: #007bff; }
-        .pagination span.current { background: #007bff; color: white; border-color: #007bff; }
-    </style>
+    /* Tông màu chủ đạo đen trắng cổ điển */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #7f8c8d;
+        --light-color: #ecf0f1;
+        --dark-color: #2c3e50;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --danger-color: #e74c3c;
+        --border-color: #dce1e5;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header và tiêu đề */
+    h1 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--accent-color);
+    }
+
+    h3 {
+        color: var(--secondary-color);
+        font-weight: 500;
+        margin-bottom: 1.2rem;
+    }
+
+    /* Nút quay lại Dashboard */
+    .btn-outline-secondary {
+        display: inline-block;
+        padding: 0.5rem 1.2rem;
+        border: 1px solid var(--accent-color);
+        color: var(--secondary-color);
+        text-decoration: none;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        font-weight: 500;
+        background: white;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--secondary-color);
+        color: white;
+        border-color: var(--secondary-color);
+        text-decoration: none;
+    }
+
+    /* Form section */
+    .form-section {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        border: 1px solid var(--border-color);
+    }
+
+    /* Form elements */
+    form > div {
+        margin-bottom: 1.2rem;
+    }
+
+    label {
+        display: block;
+        font-weight: 500;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+        width: 100%;
+        max-width: 300px;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0.2rem rgba(127, 140, 141, 0.25);
+        outline: none;
+    }
+
+    input:disabled {
+        background-color: #f8f9fa;
+        opacity: 0.7;
+    }
+
+    /* Button styling */
+    button {
+        padding: 0.6rem 1.2rem;
+        border: none;
+        border-radius: 4px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        margin-right: 10px;
+    }
+
+    button[type="submit"] {
+        background-color: var(--success-color);
+        color: white;
+    }
+
+    button[type="submit"]:hover {
+        background-color: #219653;
+    }
+
+    #cancel-btn {
+        background-color: var(--accent-color);
+        color: white;
+    }
+
+    #cancel-btn:hover {
+        background-color: #6c7a7d;
+    }
+
+    .actions button {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.875rem;
+        margin: 0 2px;
+    }
+
+    .actions button:first-child {
+        background-color: var(--warning-color);
+        color: white;
+    }
+
+    .actions button:first-child:hover {
+        background-color: #e67e22;
+    }
+
+    .actions button:last-child {
+        background-color: var(--danger-color);
+        color: white;
+    }
+
+    .actions button:last-child:hover {
+        background-color: #c0392b;
+    }
+
+    /* Table styling */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    }
+
+    th, td {
+        border: 1px solid var(--border-color);
+        padding: 0.85rem 0.75rem;
+        text-align: left;
+    }
+
+    th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
+        border-color: var(--primary-color);
+    }
+
+    tbody tr:nth-child(even) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Message styling */
+    .error {
+        color: var(--danger-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    .success {
+        color: var(--success-color);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+        display: block;
+    }
+
+    /* Loading indicator */
+    #loading {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--primary-color);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 4px;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+
+    /* Pagination */
+    .pagination {
+        margin-top: 25px;
+        text-align: center;
+    }
+
+    .pagination a,
+    .pagination span {
+        display: inline-block;
+        padding: 0.5rem 0.9rem;
+        margin: 0 3px;
+        border: 1px solid var(--border-color);
+        text-decoration: none;
+        color: var(--secondary-color);
+        border-radius: 4px;
+        transition: all 0.2s ease;
+    }
+
+    .pagination a:hover {
+        background-color: var(--light-color);
+    }
+
+    .pagination span.current {
+        background: var(--primary-color);
+        color: white;
+        border-color: var(--primary-color);
+    }
+
+    /* Horizontal rule */
+    hr {
+        border: none;
+        border-top: 1px solid var(--border-color);
+        margin: 25px 0;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        body {
+            padding: 15px;
+        }
+        
+        .form-section {
+            padding: 15px;
+        }
+        
+        input[type="text"],
+        input[type="number"] {
+            max-width: 100%;
+        }
+        
+        table {
+            display: block;
+            overflow-x: auto;
+        }
+        
+        .actions button {
+            display: block;
+            width: 100%;
+            margin-bottom: 5px;
+        }
+    }
+
+   
+    button:focus,
+    input:focus {
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+    }
+</style>
 </head>
 <body>
-    <h1>Quản trị Khách hàng</h1>
+    <h1>Quản Lý Khách hàng</h1>
      <a href="{{ route('admin.dashboard') }}" class="btn btn-outline-secondary">
                         <i class="fas fa-arrow-left"></i> Quay lại Dashboard
                     </a>

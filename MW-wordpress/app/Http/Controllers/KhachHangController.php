@@ -113,9 +113,9 @@ class KhachHangController extends BaseCrudController
     public function checkUser($maNguoiDung)
     {
         $ma = (int) $maNguoiDung;
-        $isEdit = request()->has('is_edit'); // Thêm tham số để biết đang edit hay create
+        $isEdit = request()->has('is_edit'); 
 
-        // Tối ưu: chỉ lấy các trường cần thiết
+        
         $nguoi = NguoiDung::select('MaNguoiDung', 'HoTen', 'SoDienThoai', 'Email')
                 ->where('MaNguoiDung', $ma)
                 ->first();

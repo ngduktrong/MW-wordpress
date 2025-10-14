@@ -7,16 +7,258 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+    /* Tông màu chủ đạo đen trắng cổ điển */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #7f8c8d;
+        --light-color: #ecf0f1;
+        --dark-color: #2c3e50;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --border-color: #dee2e6;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Header và tiêu đề */
+    h2 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--accent-color);
+    }
+
+    h5 {
+        color: white !important; /* Đảm bảo chữ luôn trắng trên nền đen */
+        font-weight: 500;
+        margin: 0;
+    }
+
+    /* Nút quay lại Dashboard */
+    .btn-outline-secondary {
+        border-color: var(--accent-color);
+        color: var(--secondary-color);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem 1.2rem;
+        font-weight: 500;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--secondary-color);
+        color: white;
+        border-color: var(--secondary-color);
+    }
+
+    /* Card styling */
+    .card {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+        background: white;
+    }
+
+    .card-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.25rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    /* Form elements */
+    .form-label {
+        font-weight: 500;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        padding: 0.6rem 0.75rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0.2rem rgba(127, 140, 141, 0.25);
+    }
+
+    /* Button styling */
+    .btn {
+        border-radius: 4px;
+        font-weight: 500;
+        padding: 0.6rem 1.2rem;
+        transition: all 0.2s ease;
+        border: none;
+    }
+
+    .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-primary:hover {
+        background-color: #1a252f;
+        border-color: #1a252f;
+    }
+
+    .btn-secondary {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+
+    .btn-secondary:hover {
+        background-color: #6c7a7d;
+        border-color: #6c7a7d;
+    }
+
+    .btn-warning {
+        background-color: var(--warning-color);
+        border-color: var(--warning-color);
+        color: #212529;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+        border-color: #e0a800;
+        color: #212529;
+    }
+
+    .btn-danger {
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #c82333;
+    }
+
+    .btn-sm {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.875rem;
+    }
+
+    /* Table styling */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        margin-bottom: 0;
+    }
+
+    .table th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
+        border: none;
+        padding: 0.85rem 0.75rem;
+    }
+
+    .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Action buttons */
+    .action-buttons {
+        white-space: nowrap;
+    }
+
+    .action-buttons .btn {
+        margin-right: 0.3rem;
+    }
+
+    .action-buttons form {
+        display: inline-block;
+    }
+
+    /* Alert styling */
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    /* Edit mode */
+    .edit-mode {
+        background-color: #fff3cd;
+        border-left: 4px solid var(--warning-color);
+    }
+
+    /* Form title color - ĐÃ SỬA: Đảm bảo chữ luôn hiển thị rõ trên nền card-header */
+    .card-header h5 {
+        color: white !important;
+        font-weight: 600;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 15px;
+        }
+        
         .action-buttons {
-            white-space: nowrap;
+            white-space: normal;
         }
-        .edit-mode {
-            background-color: #fff3cd;
+        
+        .action-buttons .btn {
+            display: block;
+            width: 100%;
+            margin-bottom: 0.3rem;
         }
-        #formTitle {
-            color: "{{ isset($phongChieu) ? '#dc3545' : '#0d6efd' }}";
+        
+        .action-buttons form {
+            display: block;
+            width: 100%;
         }
-    </style>
+    }
+
+    /* Focus states for accessibility */
+    .btn:focus,
+    .form-control:focus,
+    .form-select:focus {
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+    }
+
+    /* Margin utilities */
+    .mb-4 {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .mt-4 {
+        margin-top: 1.5rem !important;
+    }
+</style>
 </head>
 <body>
     <div class="container mt-4">

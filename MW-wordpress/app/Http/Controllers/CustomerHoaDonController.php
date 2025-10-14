@@ -25,7 +25,7 @@ class CustomerHoaDonController extends Controller
         $hoaDons = HoaDon::where('MaKhachHang', $khachHang->MaKhachHang)
                          ->with([
                              'ves.suatChieu.phim',
-                             'ves.suatChieu.phongChieu', // đã sửa phong → phongChieu
+                             'ves.suatChieu.phongChieu', 
                              'ves.ghe'
                          ])
                          ->orderByDesc('NgayLap')
@@ -34,9 +34,7 @@ class CustomerHoaDonController extends Controller
         return view('HoaDonIndex', compact('hoaDons'));
     }
 
-    /**
-     * Tạo hóa đơn mới (luôn gán MaNhanVien = 6)
-     */
+    
     public function store(Request $request)
 {
     $maNguoiDung = Auth::user()->MaNguoiDung;
@@ -48,9 +46,9 @@ class CustomerHoaDonController extends Controller
         return redirect()->route('home')->with('error', 'Không tìm thấy khách hàng.');
     }
 
-    // ✅ Lưu ý: MaKhachHang = MaNguoiDung (vì HoaDon.MaKhachHang FK → KhachHang.MaNguoiDung)
+    
     $hoaDon = HoaDon::create([
-        'MaKhachHang' => $khachHang->MaNguoiDung, // 👈 đây mới là đúng
+        'MaKhachHang' => $khachHang->MaNguoiDung, 
         'MaNhanVien'  => null,
         'NgayLap'     => now(),
         'TongTien'    => 0,
@@ -67,7 +65,7 @@ class CustomerHoaDonController extends Controller
     {
         $hoaDon = HoaDon::with([
                         'ves.suatChieu.phim',
-                        'ves.suatChieu.phongChieu', // sửa lại đúng quan hệ
+                        'ves.suatChieu.phongChieu', 
                         'ves.ghe'
                     ])->findOrFail($id);
 

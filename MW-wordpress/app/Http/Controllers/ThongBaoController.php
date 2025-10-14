@@ -20,20 +20,25 @@ class ThongBaoController extends Controller
     /**
      * Hiển thị vé sắp chiếu cho user đang đăng nhập.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $taiKhoan = Auth::user(); // instance của TaiKhoan
-        $now = Carbon::now();
+        $taiKhoan = Auth::user();
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
 
-        // Lấy MaNguoiDung từ tài khoản (bắt buộc trên model TaiKhoan bạn có trường này)
+        // Kiểm tra xem có phải là chế độ thông báo không
+        $isAlertMode = $request->has('alert') && $request->get('alert') == 'true';
+
+        // Lấy MaNguoiDung từ tài khoản
         $maNguoiDung = $taiKhoan->MaNguoiDung ?? null;
         if (!$maNguoiDung) {
-            // Nếu không có MaNguoiDung thì trả rỗng để an toàn
-            return view('ThongBao', ['ves' => collect()]);
+            return view('ThongBao', [
+                'ves' => collect(),
+                'isAlertMode' => $isAlertMode
+            ]);
         }
 
         // Tên bảng Ve
-        $veTable = (new Ve())->getTable(); // thường 'Ve'
+        $veTable = (new Ve())->getTable();
 
         // Bắt đầu query: Ve (v) join HoaDon (h) join SuatChieu (s)
         $query = DB::table($veTable . ' as v')
@@ -48,28 +53,37 @@ class ThongBaoController extends Controller
         }
 
         // Lọc: chỉ vé thuộc hóa đơn của người dùng hiện tại
-        // Theo mô hình bạn cung cấp: HoaDon.MaKhachHang = KhachHang.MaNguoiDung (và TaiKhoan.MaNguoiDung là id người dùng)
         if (Schema::hasColumn('HoaDon', 'MaKhachHang')) {
             $query->where('h.MaKhachHang', $maNguoiDung);
         } else {
-            // nếu không có cột MaKhachHang trong HoaDon thì trả rỗng để tránh leak dữ liệu
-            return view('ThongBao', ['ves' => collect()]);
+            return view('ThongBao', [
+                'ves' => collect(),
+                'isAlertMode' => $isAlertMode
+            ]);
         }
 
-        // Lọc chỉ vé sắp chiếu: SuatChieu.NgayGioChieu > now
-        if (Schema::hasColumn('SuatChieu', 'NgayGioChieu')) {
-            $query->where('s.NgayGioChieu', '>', $now);
-            $query->orderBy('s.NgayGioChieu', 'asc');
+        // Lọc vé theo chế độ
+        if ($isAlertMode) {
+            // CHẾ ĐỘ THÔNG BÁO: chỉ vé sắp chiếu trong vòng 1 giờ tới
+            $oneHourLater = $now->copy()->addHour();
+            if (Schema::hasColumn('SuatChieu', 'NgayGioChieu')) {
+                $query->whereBetween('s.NgayGioChieu', [$now, $oneHourLater]);
+                $query->orderBy('s.NgayGioChieu', 'asc');
+            }
         } else {
-            // Nếu không có cột thời gian trên SuatChieu, thử dùng v.NgayDat
-            if (Schema::hasColumn($veTable, 'NgayDat')) {
-                $query->where('v.NgayDat', '>', $now);
-                $query->orderBy('v.NgayDat', 'asc');
+            // CHẾ ĐỘ THÔNG THƯỜNG: vé sắp chiếu trong tương lai
+            if (Schema::hasColumn('SuatChieu', 'NgayGioChieu')) {
+                $query->where('s.NgayGioChieu', '>', $now);
+                $query->orderBy('s.NgayGioChieu', 'asc');
             } else {
-                // fallback order by primary key MaVe nếu có
-                $primary = (new Ve())->getKeyName(); // MaVe
-                if (Schema::hasColumn($veTable, $primary)) {
-                    $query->orderBy("v.$primary", 'asc');
+                if (Schema::hasColumn($veTable, 'NgayDat')) {
+                    $query->where('v.NgayDat', '>', $now);
+                    $query->orderBy('v.NgayDat', 'asc');
+                } else {
+                    $primary = (new Ve())->getKeyName();
+                    if (Schema::hasColumn($veTable, $primary)) {
+                        $query->orderBy("v.$primary", 'asc');
+                    }
                 }
             }
         }
@@ -88,7 +102,6 @@ class ThongBaoController extends Controller
         if ($joinPhim && Schema::hasColumn('Phim', 'TenPhim')) {
             $selects[] = 'p.TenPhim as TenPhim';
         } else if (Schema::hasColumn('SuatChieu', 'MaPhim')) {
-            // nếu không join Phim thì vẫn lấy MaPhim để hiển thị nếu cần
             $selects[] = 's.MaPhim as MaPhim';
         }
 
@@ -113,6 +126,9 @@ class ThongBaoController extends Controller
             ];
         });
 
-        return view('ThongBao', ['ves' => $ves]);
+        return view('ThongBao', [
+            'ves' => $ves,
+            'isAlertMode' => $isAlertMode
+        ]);
     }
 }

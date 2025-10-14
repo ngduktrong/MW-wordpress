@@ -1,8 +1,56 @@
 @extends('layouts.app')
 
 @section('content')
-<h2>Chi tiết vé</h2>
+@include('layouts.nav')
+<style>
+     body {
+        background-image: url('/img/home-wallpaper.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
 
+    .container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+        height: 100vh;
+    }
+
+    body::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        z-index: 0;
+        pointer-events: none;
+        height: auto;
+        height: min(1100px);
+    }
+
+    .container>* {
+        position: relative;
+        z-index: 2;
+    }
+    .hoadon-infor {
+        color: rgb(0, 0, 0);
+        padding: 20px;
+        width: 800px;
+        padding: 30px;
+        display: flex;
+        flex-direction: column;
+        background-color: rgba(255, 255, 255, 0.8);
+        border-radius: 15px;
+    }
+</style>
+<div class="container">
+
+<div class="hoadon-infor">
+    <h2>Chi tiết vé</h2>
 <p>Khách hàng: {{ $hoaDon->khachHang->HoTen ?? 'Khách lẻ' }}</p>
 <p>Hóa đơn: {{ $hoaDon->MaHoaDon }}</p>
 <p>Trạng thái hóa đơn: {{ $hoaDon->TrangThai }}</p>
@@ -41,4 +89,6 @@
 
 
 <a href="{{ route('home') }}">Quay về trang chủ</a>
+</div>
+</div>
 @endsection

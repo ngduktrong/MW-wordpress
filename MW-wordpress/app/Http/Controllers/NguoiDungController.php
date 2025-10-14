@@ -23,10 +23,29 @@ class NguoiDungController extends BaseCrudController
     }
 
     public function edit($id)
-    {
+{
+    try {
+        \Log::info('Editing user with ID: ' . $id);
+        
         $nguoiDung = NguoiDung::with(['khachHang', 'nhanVien', 'taiKhoan'])->findOrFail($id);
+        
+        \Log::info('User found: ' . $nguoiDung->MaNguoiDung);
+        
         return response()->json($nguoiDung);
+        
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        \Log::error('User not found: ' . $id);
+        return response()->json([
+            'error' => 'Người dùng không tồn tại'
+        ], 404);
+        
+    } catch (\Exception $e) {
+        \Log::error('Error fetching user: ' . $e->getMessage());
+        return response()->json([
+            'error' => 'Lỗi server: ' . $e->getMessage()
+        ], 500);
     }
+}
 
     public function store(Request $request)
     {

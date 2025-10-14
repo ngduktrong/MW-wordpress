@@ -6,228 +6,258 @@
     <title>Đăng ký</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-        
-        body {
-            background: linear-gradient(120deg, #1e5799, #207cca, #2989d8, #1e5799);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
-        
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+        background-image: url('/img/home-wallpaper.jpg');
+        background-size: cover;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+    
+    .container {
+        width: 100%;
+        max-width: 450px;
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .header {
+        background: #2c3e50;
+        color: white;
+        text-align: center;
+        padding: 25px 20px;
+        position: relative;
+    }
+    
+    .header h1 {
+        font-size: 1.8rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .header::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80px;
+        height: 3px;
+        background: #7f8c8d;
+        border-radius: 2px;
+    }
+    
+    .form-container {
+        padding: 30px;
+    }
+    
+    .notification {
+        padding: 12px 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-size: 0.95rem;
+        display: flex;
+        align-items: center;
+        border-left: 4px solid;
+    }
+    
+    .notification.error {
+        background-color: #f8f8f8;
+        color: #c62828;
+        border-left-color: #c62828;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .notification.success {
+        background-color: #f8f8f8;
+        color: #2e7d32;
+        border-left-color: #2e7d32;
+        border: 1px solid #e0e0e0;
+    }
+    
+    .notification i {
+        margin-right: 10px;
+        font-size: 1.2rem;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+        position: relative;
+    }
+    
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #2c3e50;
+        font-size: 0.95rem;
+    }
+    
+    .form-group i {
+        position: absolute;
+        left: 15px;
+        top: 40px;
+        color: #7f8c8d;
+        font-size: 1rem;
+    }
+    
+    .input-field {
+        width: 100%;
+        padding: 14px 14px 14px 40px;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: all 0.3s ease;
+        background: #f9f9f9;
+        color: #333;
+    }
+    
+    .input-field:focus {
+        border-color: #2c3e50;
+        box-shadow: 0 0 0 2px rgba(44, 62, 80, 0.1);
+        outline: none;
+        background: white;
+    }
+
+    .input-field.error {
+        border-color: #c62828;
+        box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.1);
+    }
+    
+    .error-message {
+        color: #c62828;
+        font-size: 0.85rem;
+        margin-top: 5px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .error-message i {
+        margin-right: 5px;
+        font-size: 0.8rem;
+        position: static;
+    }
+    
+    .btn-submit {
+        width: 100%;
+        padding: 14px;
+        background: #2c3e50;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 10px;
+        letter-spacing: 0.5px;
+    }
+    
+    .btn-submit:hover {
+        background: #34495e;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+    
+    .login-link {
+        text-align: center;
+        margin-top: 25px;
+        color: #7f8c8d;
+        font-size: 0.95rem;
+    }
+    
+    .login-link a {
+        color: #2c3e50;
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.3s;
+    }
+    
+    .login-link a:hover {
+        color: #34495e;
+        text-decoration: underline;
+    }
+    
+    .password-rules {
+        background: #f8f9fa;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 15px;
+        border-left: 4px solid #2c3e50;
+        font-size: 0.85rem;
+        color: #555;
+        border: 1px solid #e9ecef;
+    }
+    
+    .password-rules ul {
+        padding-left: 20px;
+        margin-top: 8px;
+    }
+    
+    .password-rules li {
+        margin-bottom: 5px;
+        color: #666;
+    }
+
+    .field-requirements {
+        font-size: 0.8rem;
+        color: #7f8c8d;
+        margin-top: 3px;
+        font-style: italic;
+    }
+
+    .btn-submit i {
+        margin-right: 8px;
+    }
+    
+    @media (max-width: 480px) {
         .container {
-            width: 100%;
-            max-width: 450px;
-            background: rgba(255, 255, 255, 0.95);
-            border-radius: 16px;
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .header {
-            background: #2980b9;
-            color: white;
-            text-align: center;
-            padding: 25px 20px;
-            position: relative;
-        }
-        
-        .header h1 {
-            font-size: 1.8rem;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-        }
-        
-        .header::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 4px;
-            background: #f1c40f;
-            border-radius: 2px;
+            max-width: 100%;
         }
         
         .form-container {
-            padding: 30px;
+            padding: 25px 20px;
         }
         
-        .notification {
-            padding: 12px 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-            display: flex;
-            align-items: center;
+        .header {
+            padding: 20px 15px;
         }
         
-        .notification.error {
-            background-color: #ffebee;
-            color: #c62828;
-            border-left: 4px solid #c62828;
-        }
-        
-        .notification.success {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            border-left: 4px solid #2e7d32;
-        }
-        
-        .notification i {
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: #2c3e50;
-            font-size: 0.95rem;
-        }
-        
-        .form-group i {
-            position: absolute;
-            left: 15px;
-            top: 40px;
-            color: #7f8c8d;
-            font-size: 1rem;
-        }
-        
-        .input-field {
-            width: 100%;
-            padding: 14px 14px 14px 40px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            background: #f9f9f9;
-        }
-        
-        .input-field:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
-            outline: none;
-            background: white;
-        }
-
-        .input-field.error {
-            border-color: #c62828;
-            box-shadow: 0 0 0 2px rgba(198, 40, 40, 0.1);
-        }
-        
-        .error-message {
-            color: #c62828;
-            font-size: 0.85rem;
-            margin-top: 5px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .error-message i {
-            margin-right: 5px;
-            font-size: 0.8rem;
-        }
-        
-        .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background: #2980b9;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-top: 10px;
-            letter-spacing: 0.5px;
-        }
-        
-        .btn-submit:hover {
-            background: #2471a3;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-        
-        .login-link {
-            text-align: center;
-            margin-top: 25px;
-            color: #7f8c8d;
-            font-size: 0.95rem;
-        }
-        
-        .login-link a {
-            color: #2980b9;
-            text-decoration: none;
-            font-weight: 600;
-            transition: color 0.3s;
-        }
-        
-        .login-link a:hover {
-            color: #2471a3;
-            text-decoration: underline;
-        }
-        
-        .password-rules {
-            background: #f8f9fa;
-            border-radius: 8px;
+        body {
             padding: 15px;
-            margin-top: 15px;
-            border-left: 4px solid #3498db;
-            font-size: 0.85rem;
-            color: #555;
+            background-attachment: scroll;
         }
-        
-        .password-rules ul {
-            padding-left: 20px;
-            margin-top: 8px;
-        }
-        
-        .password-rules li {
-            margin-bottom: 5px;
-        }
+    }
 
-        .field-requirements {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 3px;
-        }
-        
-        @media (max-width: 480px) {
-            .container {
-                max-width: 100%;
-            }
-            
-            .form-container {
-                padding: 25px 20px;
-            }
-            
-            .header {
-                padding: 20px 15px;
-            }
-        }
-    </style>
+    /* Overlay để làm nổi bật form trên ảnh nền */
+    body::before {
+        content: '';
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.4);
+        z-index: -1;
+    }
+</style>
 </head>
 <body>
     <div class="container">

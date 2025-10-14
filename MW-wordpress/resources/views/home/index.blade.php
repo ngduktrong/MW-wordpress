@@ -179,6 +179,12 @@ body > * {
                             Quốc gia: {{ $phim->NuocSanXuat }}
                         </div>
                     </a>
+                     <form action="{{ route('home.show', [$phim->MaPhim]) }}" method="GET">
+                        <div class="film-infor-bookBtn">
+                            <i class="fa-solid fa-heart love-icon"></i>
+                            <button class="btnbookTk btn-shadow">Đặt Vé</button>
+                        </div>
+                    </form>
                 </li>
             @empty
                 <li>Không có phim sắp chiếu.</li>

@@ -75,7 +75,7 @@ class GheController extends Controller
     }
 
     /**
-     * Thêm ghế (single hoặc bulk) - ĐÃ SỬA LỖI TIMESTAMPS VÀ THÊM KIỂM TRA
+     * Thêm ghế (single hoặc bulk) 
      */
     public function store(Request $request)
     {
@@ -121,7 +121,7 @@ class GheController extends Controller
                     $soGhe = $rowChar . str_pad($colIndex, 2, '0', STR_PAD_LEFT);
                     
                     if (!in_array($soGhe, $existing)) {
-                        // SỬA: Chỉ insert MaPhong và SoGhe, không có timestamps
+                        
                         DB::table('Ghe')->insert([
                             'MaPhong' => $maPhong,
                             'SoGhe' => $soGhe
@@ -156,7 +156,7 @@ class GheController extends Controller
             }
         }
 
-        // --- Single add - ĐÃ SỬA LỖI TIMESTAMPS VÀ THÊM KIỂM TRA ---
+        
         $request->validate([
             'MaPhong' => 'required',
             'SoGhe' => ['required', 'string', 'max:5', 'regex:/^[A-Z][A-Za-z0-9]{0,4}$/'],
@@ -180,7 +180,7 @@ class GheController extends Controller
         }
 
         try {
-            // SỬA: Chỉ insert MaPhong và SoGhe, không có timestamps
+           
             DB::table('Ghe')->insert([
                 'MaPhong' => $maPhong,
                 'SoGhe' => $soGhe
@@ -192,7 +192,7 @@ class GheController extends Controller
     }
 
     /**
-     * Cập nhật ghế - ĐÃ SỬA LỖI TIMESTAMPS VÀ THÊM KIỂM TRA
+     * Cập nhật ghế 
      */
     public function update(Request $request, $maPhong, $soGhe)
     {
@@ -218,7 +218,7 @@ class GheController extends Controller
 
         DB::beginTransaction();
         try {
-            // lấy bản ghi cũ
+            
             $gheOld = DB::table('Ghe')->where('MaPhong', $maPhong)->where('SoGhe', $soGhe)->first();
             if (!$gheOld) {
                 DB::rollBack();
@@ -233,11 +233,11 @@ class GheController extends Controller
 
             $columns = Schema::getColumnListing('Ghe');
 
-            // chuẩn bị row mới - LOẠI BỎ TIMESTAMPS
+            
             $newRow = [];
             foreach ($columns as $col) {
                 if (in_array($col, $autoCols)) continue;
-                // Bỏ qua các trường timestamps
+                
                 if (in_array($col, ['created_at', 'updated_at'])) continue;
                 
                 if ($col === 'SoGhe') {
@@ -271,7 +271,7 @@ class GheController extends Controller
                         ->where('SoGhe', $soGhe)
                         ->update(['SoGhe' => $newSoGhe]);
                 } else {
-                    // Nếu bảng con dùng tên cột khác (ví dụ 'so_ghe'), bạn cần map thủ công ở đây
+                    
                     if (in_array('so_ghe', $cols)) {
                         DB::table($table)
                             ->where('MaPhong', $maPhong)

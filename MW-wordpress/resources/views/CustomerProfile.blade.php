@@ -114,7 +114,7 @@
 
     <div class="profile-actions">
         <a href="{{ route('home') }}">🏠 Trang chủ</a>
-        <a href="{{ route('user.showUpdateProfileForm') }}">✏️ Cập nhật</a>
+        <a href="{{ route('user.showUpdateProfileForm') }}">✏️ Chỉnh Sửa</a>
         <a href="{{ route('user.showChangePasswordForm') }}">🔒 Đổi mật khẩu</a>
     </div>
 </div>

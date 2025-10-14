@@ -48,6 +48,14 @@
 @endsection
 
 <style>
+    body {
+      background-image: url('/img/home-wallpaper.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
 .ticket-container {
     max-width: 900px;
     margin: 40px auto;

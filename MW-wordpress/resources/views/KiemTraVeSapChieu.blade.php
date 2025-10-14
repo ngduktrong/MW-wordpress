@@ -8,7 +8,308 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+    /* Tông màu chủ đạo đen trắng cổ điển */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #7f8c8d;
+        --light-color: #ecf0f1;
+        --dark-color: #2c3e50;
+        --success-color: #28a745;
+        --warning-color: #ffc107;
+        --danger-color: #dc3545;
+        --info-color: #17a2b8;
+        --border-color: #dee2e6;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+
+    .container {
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+
+    /* Header và tiêu đề */
+    h1 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin: 0;
+    }
+
+    h5 {
+        color: white !important;
+        font-weight: 500;
+        margin: 0;
+    }
+
+    /* Nút quay lại Dashboard */
+    .btn-outline-secondary {
+        border-color: var(--accent-color);
+        color: var(--secondary-color);
+        transition: all 0.3s ease;
+        padding: 0.5rem 1.2rem;
+        font-weight: 500;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--secondary-color);
+        color: white;
+        border-color: var(--secondary-color);
+    }
+
+    /* Card styling */
+    .card {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        margin-bottom: 1.5rem;
+        background: white;
+    }
+
+    .card-header {
+        background-color: var(--primary-color);
+        color: white;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.25rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .bg-primary { background-color: var(--primary-color) !important; }
+    .bg-info { background-color: var(--info-color) !important; }
+
+    /* Button styling */
+    .btn {
+        border-radius: 6px;
+        font-weight: 500;
+        padding: 0.8rem 1.5rem;
+        transition: all 0.2s ease;
+        border: none;
+        font-size: 1.1rem;
+    }
+
+    .btn-success {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        border-color: #218838;
+    }
+
+    .btn-warning {
+        background-color: var(--warning-color);
+        border-color: var(--warning-color);
+        color: #212529;
+    }
+
+    .btn-warning:hover {
+        background-color: #e0a800;
+        border-color: #e0a800;
+        color: #212529;
+    }
+
+    .btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+    }
+
+    /* Alert styling */
+    .alert {
+        border-radius: 6px;
+        border: 1px solid transparent;
+        padding: 1rem 1.25rem;
+    }
+
+    .alert-info {
+        background-color: #d1ecf1;
+        border-color: #bee5eb;
+        color: #0c5460;
+    }
+
+    .alert-success {
+        background-color: #d4edda;
+        border-color: #c3e6cb;
+        color: #155724;
+    }
+
+    .alert-warning {
+        background-color: #fff3cd;
+        border-color: #ffecb5;
+        color: #664d03;
+    }
+
+    /* Table styling */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+        margin-bottom: 0;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
+        border: none;
+        padding: 0.85rem 0.75rem;
+    }
+
+    .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid var(--border-color);
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Badge styling */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+    }
+
+    .bg-success { background-color: var(--success-color) !important; }
+    .bg-primary { background-color: var(--primary-color) !important; }
+    .bg-secondary { background-color: var(--accent-color) !important; }
+
+    /* Text styling */
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+
+    .text-success {
+        color: var(--success-color) !important;
+    }
+
+    .text-warning {
+        color: var(--warning-color) !important;
+    }
+
+    .text-muted {
+        color: #6c757d !important;
+    }
+
+    /* Border utilities */
+    .border-bottom {
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 15px;
+        }
+        
+        .card-body {
+            padding: 1rem;
+        }
+        
+        .btn {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        
+        .d-flex.justify-content-between {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .d-flex.justify-content-between h1 {
+            text-align: center;
+        }
+        
+        .table-responsive {
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+    }
+
+    /* Focus states for accessibility */
+    .btn:focus {
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+    }
+
+    /* Margin utilities */
+    .mt-4 {
+        margin-top: 1.5rem !important;
+    }
+
+    .mb-4 {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .mb-0 {
+        margin-bottom: 0 !important;
+    }
+
+    .pb-2 {
+        padding-bottom: 0.5rem !important;
+    }
+
+    /* Icon spacing */
+    .fas {
+        margin-right: 0.5rem;
+    }
+
+    .me-2 {
+        margin-right: 0.5rem !important;
+    }
+
+    /* Spinner */
+    .spinner-border-sm {
+        width: 1rem;
+        height: 1rem;
+    }
+
+    /* Text sizing */
+    .fs-5 {
+        font-size: 1.25rem !important;
+    }
+
+    .fs-6 {
+        font-size: 1rem !important;
+    }
+
+    /* Custom button padding for larger buttons */
+    .py-3 {
+        padding-top: 1rem !important;
+        padding-bottom: 1rem !important;
+    }
+
+    /* Time section styling */
+    .card-body .row .col-md-6:first-child {
+        display: block; /* Hiển thị lại phần thời gian hiện tại */
+    }
+
+    /* Time display styling */
+    #current-time {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+    }
+</style>
 </head>
+
 <body>
     <div class="container mt-4">
         <div class="row">

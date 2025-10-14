@@ -2,43 +2,45 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
 use App\Models\Phim;
+use Carbon\Carbon;
 
 class CustomerHomeController extends Controller
 {
-    // public function show($id){
-    //     $phim =  Phim::findOrFail($id);
-    //     return view('home.show',compact('phim'));
-    // }
     public function show($id, Request $request)
-{
-    $phim = Phim::with('suatChieu.phongChieu')->findOrFail($id);
+    {
+        $phim = Phim::with('suatChieu.phongChieu')->findOrFail($id);
 
-    // lấy danh sách ngày chiếu distinct
-    $ngayChieu = $phim->suatChieu()
-                      ->selectRaw('DATE(NgayGioChieu) as ngay')
-                      ->distinct()
-                      ->pluck('ngay');
+        // ✅ Lấy danh sách ngày chiếu, chỉ lấy từ hôm nay trở đi
+        $ngayChieu = $phim->suatChieu()
+            ->selectRaw('DATE(NgayGioChieu) as ngay')
+            ->whereDate('NgayGioChieu', '>=', Carbon::today())
+            ->distinct()
+            ->orderBy('ngay')
+            ->pluck('ngay');
 
-    $suatTheoNgay = [];
-    if ($request->has('ngay')) {
-        $suatTheoNgay = $phim->suatChieu()
-                             ->with('phongChieu')
-                             ->whereDate('NgayGioChieu', $request->ngay)
-                             ->get();
+        // ✅ Lọc suất chiếu theo ngày, chỉ lấy suất chưa chiếu
+        $suatTheoNgay = collect();
+        if ($request->has('ngay')) {
+            $suatTheoNgay = $phim->suatChieu()
+                ->with('phongChieu')
+                ->whereDate('NgayGioChieu', $request->ngay)
+                ->where('NgayGioChieu', '>=', Carbon::now()) // chỉ lấy suất trong tương lai
+                ->orderBy('NgayGioChieu')
+                ->get();
+        }
+
+        return view('home.show', compact('phim', 'ngayChieu', 'suatTheoNgay'));
     }
 
-    return view('home.show', compact('phim', 'ngayChieu', 'suatTheoNgay'));
-}
-
-    public function index(){
+    public function index()
+    {
         $today = now()->toDateString();
 
-        $phimDangChieu = Phim::where('NgayKhoiChieu' ,'<=',$today)->get();
+        $phimDangChieu = Phim::where('NgayKhoiChieu', '<=', $today)->get();
+        $phimSapChieu = Phim::where('NgayKhoiChieu', '>', $today)->get();
 
-        $phimSapChieu = Phim::where('NgayKhoiChieu','>',$today)->get();
-        return view('home.index',compact('phimDangChieu','phimSapChieu'));
+        return view('home.index', compact('phimDangChieu', 'phimSapChieu'));
     }
 }

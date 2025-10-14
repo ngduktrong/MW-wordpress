@@ -47,7 +47,6 @@ class TaiKhoanController extends Controller
             'TenDangNhap' => 'required|string|max:50|unique:TaiKhoan,TenDangNhap',
             'MatKhau' => 'required|string|min:6',
             'LoaiTaiKhoan' => ['required', Rule::in(['admin','user'])],
-            // THAY ĐỔI: từ nullable thành required khi tạo mới
             'MaNguoiDung' => 'required|integer|exists:NguoiDung,MaNguoiDung|unique:TaiKhoan,MaNguoiDung',
         ]);
 
@@ -71,13 +70,20 @@ class TaiKhoanController extends Controller
             ]);
 
             if ($request->wantsJson()) {
-                return response()->json(['success' => true, 'data' => $tk], 201);
+                return response()->json([
+                    'success' => true, 
+                    'data' => $tk,
+                    'message' => 'Tạo tài khoản thành công!' // THÊM THÔNG BÁO
+                ], 201);
             }
             return redirect()->route('admin.taikhoan.index')->with('success', 'Tạo tài khoản thành công.');
         } catch (\Exception $e) {
             Log::error('TaiKhoan store error: ' . $e->getMessage());
             if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Lỗi khi tạo tài khoản.'], 500);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Lỗi khi tạo tài khoản.'
+                ], 500);
             }
             return redirect()->back()->with('error', 'Lỗi khi tạo tài khoản.')->withInput();
         }
@@ -91,14 +97,8 @@ class TaiKhoanController extends Controller
         $data = $request->all();
 
         $rules = [
-            // TenDangNhap là PK — không cho sửa PK. (nếu muốn sửa PK, cần logic phức tạp)
-            //'TenDangNhap' => 'required|string|max:50|unique:TaiKhoan,TenDangNhap,'.$tenDangNhap .',TenDangNhap',
             'MatKhau' => 'nullable|string|min:6',
             'LoaiTaiKhoan' => ['required', Rule::in(['admin','user'])],
-            // LOẠI BỎ: validation cho MaNguoiDung trong update vì không cho phép sửa
-            // 'MaNguoiDung' => ['nullable','integer', 'exists:NguoiDung,MaNguoiDung',
-            //     Rule::unique('TaiKhoan', 'MaNguoiDung')->ignore($tk->TenDangNhap, 'TenDangNhap')
-            // ],
         ];
 
         $validator = Validator::make($data, $rules);
@@ -114,8 +114,6 @@ class TaiKhoanController extends Controller
             // Nếu MatKhau rỗng -> giữ nguyên mật khẩu hiện tại
             $updateData = [
                 'LoaiTaiKhoan' => $data['LoaiTaiKhoan'],
-                // KHÔNG cập nhật MaNguoiDung khi sửa
-                // 'MaNguoiDung' => $data['MaNguoiDung'] ?? null,
             ];
 
             if (!empty($data['MatKhau'])) {
@@ -125,13 +123,20 @@ class TaiKhoanController extends Controller
             $tk->update($updateData);
 
             if ($request->wantsJson()) {
-                return response()->json(['success' => true, 'data' => $tk]);
+                return response()->json([
+                    'success' => true, 
+                    'data' => $tk,
+                    'message' => 'Cập nhật tài khoản thành công!' // THÊM THÔNG BÁO
+                ]);
             }
             return redirect()->route('admin.taikhoan.index')->with('success', 'Cập nhật thành công.');
         } catch (\Exception $e) {
             Log::error('TaiKhoan update error: ' . $e->getMessage());
             if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Lỗi khi cập nhật tài khoản.'], 500);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Lỗi khi cập nhật tài khoản.'
+                ], 500);
             }
             return redirect()->back()->with('error', 'Lỗi khi cập nhật tài khoản.');
         }
@@ -145,13 +150,19 @@ class TaiKhoanController extends Controller
             $tk->delete();
 
             if ($request->wantsJson()) {
-                return response()->json(['success' => true]);
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Xóa tài khoản thành công!' // THÊM THÔNG BÁO
+                ]);
             }
             return redirect()->route('admin.taikhoan.index')->with('success', 'Xoá tài khoản thành công.');
         } catch (\Exception $e) {
             Log::error('TaiKhoan destroy error: ' . $e->getMessage());
             if ($request->wantsJson()) {
-                return response()->json(['success' => false, 'message' => 'Lỗi khi xoá tài khoản.'], 500);
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Lỗi khi xoá tài khoản.'
+                ], 500);
             }
             return redirect()->back()->with('error', 'Lỗi khi xoá tài khoản.');
         }

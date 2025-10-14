@@ -12,13 +12,15 @@ class KiemTraVeSapChieuController extends Controller
 {
     public function index()
     {
-        $now = Carbon::now();
+        // ✅ Lấy thời gian hiện tại theo múi giờ Việt Nam
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
         return view('KiemTraVeSapChieu', compact('now'));
     }
 
     public function danhSachVeSapChieu()
     {
-        $now = Carbon::now();
+        // ✅ Dùng múi giờ Việt Nam để đảm bảo thời gian chính xác
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
         $oneHourLater = $now->copy()->addHour();
 
         // Lấy danh sách vé đã thanh toán và có suất chiếu trong vòng 1 tiếng tới
@@ -70,7 +72,8 @@ class KiemTraVeSapChieuController extends Controller
 
     public function thongBaoVeSapChieu()
     {
-        $now = Carbon::now();
+        // ✅ Dùng múi giờ Việt Nam để đảm bảo đúng giờ chiếu thực tế
+        $now = Carbon::now('Asia/Ho_Chi_Minh');
         $oneHourLater = $now->copy()->addHour();
 
         // Lấy danh sách vé cần thông báo
@@ -88,33 +91,20 @@ class KiemTraVeSapChieuController extends Controller
             // Kiểm tra xem vé có hóa đơn và khách hàng không
             if ($ve->hoaDon && $ve->hoaDon->MaKhachHang) {
                 $maKhachHang = $ve->hoaDon->MaKhachHang;
-                
-                // Gửi thông báo đến khách hàng (giả lập)
-                // Trong thực tế, bạn có thể:
-                // - Lưu vào bảng notifications
-                // - Gửi email
-                // - Gửi SMS
-                // - Push notification
-                
+
                 if (!in_array($maKhachHang, $khachHangNotified)) {
                     $khachHangNotified[] = $maKhachHang;
                     $thongBaoCount++;
+
                     
-                    // TODO: Thực hiện gửi thông báo thực tế ở đây
-                    // Ví dụ: 
-                    // Notification::create([
-                    //     'MaKhachHang' => $maKhachHang,
-                    //     'NoiDung' => 'Suất chiếu ' . $ve->suatChieu->phim->TenPhim . ' sẽ bắt đầu lúc ' . $ve->suatChieu->NgayGioChieu->format('H:i d/m/Y'),
-                    //     'Loai' => 'reminder',
-                    //     'TrangThai' => 'sent'
-                    // ]);
                 }
             }
         }
 
         return response()->json([
             'success' => true,
-            'message' => 'Đã gửi thông báo cho ' . $thongBaoCount . ' khách hàng về ' . $ves->count() . ' vé sắp chiếu.',
+            'message' => 'Đã gửi thông báo cho ' . $thongBaoCount . 
+                         ' khách hàng về ' . $ves->count() . ' vé sắp chiếu.',
             'thongBaoCount' => $thongBaoCount,
             'veCount' => $ves->count(),
             'thoi_gian_kiem_tra' => [
@@ -123,4 +113,9 @@ class KiemTraVeSapChieuController extends Controller
             ]
         ]);
     }
+    public function triggerUserNotification()
+{
+    
+    return redirect()->route('thongbao', ['alert' => 'true']);
+}
 }

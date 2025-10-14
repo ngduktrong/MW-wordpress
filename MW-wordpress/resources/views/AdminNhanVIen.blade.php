@@ -7,27 +7,242 @@
     <title>Quản lý nhân viên</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
+    /* Tông màu chủ đạo đen trắng cổ điển */
+    :root {
+        --primary-color: #2c3e50;
+        --secondary-color: #34495e;
+        --accent-color: #7f8c8d;
+        --light-color: #ecf0f1;
+        --dark-color: #2c3e50;
+        --success-color: #27ae60;
+        --warning-color: #f39c12;
+        --danger-color: #e74c3c;
+    }
+
+    body {
+        background-color: #f8f9fa;
+        color: #333;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        line-height: 1.6;
+    }
+
+    .container-fluid {
+        padding: 20px;
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+
+    /* Header và tiêu đề */
+    h1 {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid var(--accent-color);
+    }
+
+    h4 {
+        color: var(--secondary-color);
+        font-weight: 500;
+        margin-bottom: 1.2rem;
+    }
+
+    /* Nút quay lại Dashboard */
+    .btn-outline-secondary {
+        border-color: var(--accent-color);
+        color: var(--secondary-color);
+        transition: all 0.3s ease;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem 1.2rem;
+        font-weight: 500;
+    }
+
+    .btn-outline-secondary:hover {
+        background-color: var(--secondary-color);
+        color: white;
+        border-color: var(--secondary-color);
+    }
+
+    /* Container cho form và danh sách */
+    .form-container, .list-container {
+        background: white;
+        padding: 25px;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        border: 1px solid #e1e5e9;
+    }
+
+    /* Form elements */
+    .form-label {
+        font-weight: 500;
+        color: var(--secondary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .form-control, .form-select {
+        border: 1px solid #dce1e5;
+        border-radius: 4px;
+        padding: 0.6rem 0.75rem;
+        transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .form-control:focus, .form-select:focus {
+        border-color: var(--accent-color);
+        box-shadow: 0 0 0 0.2rem rgba(127, 140, 141, 0.25);
+    }
+
+    .form-text {
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Table styling */
+    .table {
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+
+    .table th {
+        background-color: var(--primary-color);
+        color: white;
+        font-weight: 500;
+        padding: 0.85rem 0.75rem;
+        border: none;
+    }
+
+    .table td {
+        padding: 0.75rem;
+        vertical-align: middle;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: rgba(0, 0, 0, 0.02);
+    }
+
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.04);
+    }
+
+    /* Badge styling */
+    .badge {
+        font-size: 0.75rem;
+        padding: 0.35em 0.65em;
+        font-weight: 500;
+    }
+
+    .bg-danger { background-color: var(--danger-color) !important; }
+    .bg-warning { background-color: var(--warning-color) !important; }
+    .bg-info { background-color: var(--accent-color) !important; }
+
+    /* Button styling */
+    .btn {
+        border-radius: 4px;
+        font-weight: 500;
+        padding: 0.5rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-success {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
+    }
+
+    .btn-success:hover {
+        background-color: #219653;
+        border-color: #219653;
+    }
+
+    .btn-warning {
+        background-color: var(--warning-color);
+        border-color: var(--warning-color);
+        color: white;
+    }
+
+    .btn-warning:hover {
+        background-color: #e67e22;
+        border-color: #e67e22;
+        color: white;
+    }
+
+    .btn-danger {
+        background-color: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+        border-color: #c0392b;
+    }
+
+    .btn-secondary {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+    }
+
+    .btn-secondary:hover {
+        background-color: #6c7a7d;
+        border-color: #6c7a7d;
+    }
+
+    /* Action buttons in table */
+    .table .btn-sm {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        margin: 0 2px;
+    }
+
+    /* Alert container */
+    .alert-container {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        min-width: 300px;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
         .container-fluid {
-            padding: 20px;
+            padding: 15px;
         }
+        
         .form-container, .list-container {
-            background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
+            padding: 15px;
         }
-        .table th {
-            background-color: #343a40;
-            color: white;
+        
+        .btn {
+            width: 100%;
+            margin-bottom: 10px;
         }
-        .alert-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-            min-width: 300px;
+        
+        .table .btn-sm {
+            width: auto;
+            margin-bottom: 0;
         }
-    </style>
+    }
+
+    /* Additional spacing and visual improvements */
+    .mb-3 {
+        margin-bottom: 1.2rem !important;
+    }
+
+    .mb-4 {
+        margin-bottom: 2rem !important;
+    }
+
+    .text-center {
+        text-align: center;
+    }
+
+    
+    .btn:focus, .form-control:focus, .form-select:focus {
+        outline: 0;
+        box-shadow: 0 0 0 0.2rem rgba(44, 62, 80, 0.25);
+    }
+</style>
 </head>
 <body>
     <div class="alert-container" id="alertContainer"></div>

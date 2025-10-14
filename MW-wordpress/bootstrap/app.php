@@ -15,7 +15,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // Đăng ký middleware theo tên (dùng trong route)
         $middleware->alias([
             'checkAdmin' => App\Http\Middleware\CheckAdmin::class,
-            'role' => \App\Http\Middleware\CheckUserRole::class,
+              'role' => \App\Http\Middleware\CheckUserRole::class, 
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

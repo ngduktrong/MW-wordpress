@@ -23,7 +23,7 @@
     @yield('content')
   </main>
   <footer class="text-light text-center py-3">
-    <p>© 2025 Rạp phim Laravel
+    <p>© 2025 Rạp phim TML
 
     </p>
   </footer>
