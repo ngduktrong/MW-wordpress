@@ -5,150 +5,187 @@
     <title>Admin Dashboard - Rạp Chiếu Phim</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
-    body {
-        font-family: 'Segoe UI', Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-        background-color: #f5f5f5;
-        color: #333;
-        line-height: 1.6;
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;
+}
+
+body{
+    background:#0f172a;
+    color:#e5e7eb;
+}
+
+a{
+    text-decoration:none;
+}
+
+header{
+    background:linear-gradient(90deg,#020617,#111827);
+    padding:18px 30px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    border-bottom:1px solid #1f2937;
+    box-shadow:0 4px 15px rgba(0,0,0,0.5);
+}
+
+header h1{
+    font-size:1.5rem;
+    font-weight:600;
+    color:white;
+}
+
+header small{
+    color:#9ca3af;
+}
+
+header a{
+    background:#ef4444;
+    padding:8px 18px;
+    border-radius:6px;
+    color:white;
+    font-weight:500;
+    transition:.3s;
+}
+
+header a:hover{
+    background:#dc2626;
+}
+
+.container{
+    display:flex;
+    min-height:calc(100vh - 70px);
+}
+
+nav{
+    width:240px;
+    background:#020617;
+    padding:25px 15px;
+    border-right:1px solid #1f2937;
+}
+
+nav a{
+    display:block;
+    padding:12px 14px;
+    margin-bottom:6px;
+    border-radius:6px;
+    color:#cbd5f5;
+    font-size:.95rem;
+    transition:.25s;
+}
+
+nav a:hover{
+    background:#1e293b;
+    color:white;
+    transform:translateX(4px);
+}
+
+main{
+    flex:1;
+    padding:35px;
+    background:#0f172a;
+}
+
+.welcome-section{
+    margin-bottom:30px;
+    padding:22px;
+    border-radius:10px;
+    background:linear-gradient(135deg,#1e293b,#020617);
+    border:1px solid #1f2937;
+    box-shadow:0 8px 25px rgba(0,0,0,0.4);
+}
+
+.welcome-section h2{
+    margin-bottom:6px;
+    color:white;
+    font-weight:600;
+}
+
+.welcome-section p{
+    color:#94a3b8;
+}
+
+.card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+}
+
+.card{
+    background:linear-gradient(145deg,#020617,#1e293b);
+    border-radius:12px;
+    padding:28px 20px;
+    text-align:center;
+    border:1px solid #1f2937;
+    transition:.3s;
+    position:relative;
+    overflow:hidden;
+}
+
+.card::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:4px;
+    background:linear-gradient(90deg,#06b6d4,#3b82f6);
+}
+
+.card:hover{
+    transform:translateY(-6px);
+    box-shadow:0 10px 30px rgba(0,0,0,0.6);
+}
+
+.card h3{
+    font-size:2rem;
+    margin-bottom:8px;
+    color:#22c55e;
+    font-weight:700;
+}
+
+.card p{
+    color:#94a3b8;
+    font-size:.9rem;
+}
+
+.chart-container{
+    margin-top:30px;
+    background:#020617;
+    padding:25px;
+    border-radius:10px;
+    border:1px solid #1f2937;
+}
+
+@media(max-width:900px){
+
+    nav{
+        width:200px;
     }
-    a {
-        text-decoration: none;
+
+}
+
+@media(max-width:700px){
+
+    .container{
+        flex-direction:column;
     }
-    header {
-        background: #1a1a1a;
-        color: white;
-        padding: 1.2rem;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        border-bottom: 3px solid #e0e0e0;
+
+    nav{
+        width:100%;
+        display:flex;
+        flex-wrap:wrap;
+        gap:6px;
     }
-    
-    header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-        font-weight: 600;
+
+    nav a{
+        flex:1 1 45%;
+        text-align:center;
     }
-    
-    header small {
-        color: #ccc;
-        font-size: 0.9rem;
-    }
-    
-    .container {
-        display: flex;
-        min-height: calc(100vh - 80px);
-    }
-    
-    nav {
-        background: #ffffff;
-        width: 220px;
-        padding: 1.5rem 1rem;
-        border-right: 1px solid #e0e0e0;
-        box-shadow: 2px 0 5px rgba(0,0,0,0.05);
-    }
-    
-    nav a {
-        display: block;
-        padding: 12px 15px;
-        text-decoration: none;
-        color: #333;
-        border-bottom: 1px solid #f0f0f0;
-        transition: all 0.3s ease;
-        border-radius: 4px;
-        margin-bottom: 5px;
-        font-weight: 500;
-    }
-    
-    nav a:hover {
-        background: #f0f0f0;
-        color: #000;
-        transform: translateX(3px);
-    }
-    
-    main {
-        flex: 1;
-        padding: 2rem;
-        background-color: #f9f9f9;
-    }
-    
-    .welcome-section {
-        margin-bottom: 2.5rem;
-        padding: 1.5rem;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        border-left: 4px solid #1a1a1a;
-    }
-    
-    .welcome-section h2 {
-        margin-top: 0;
-        color: #1a1a1a;
-        font-weight: 600;
-    }
-    
-    .welcome-section p {
-        color: #666;
-        margin-bottom: 0;
-    }
-    
-    .card-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2.5rem;
-    }
-    
-    .card {
-        background: white;
-        padding: 1.8rem 1.2rem;
-        border-radius: 8px;
-        text-align: center;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.08);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    
-    .card h3 {
-        font-size: 1.8rem;
-        margin: 0 0 0.8rem 0;
-        color: #1a1a1a;
-        font-weight: 700;
-    }
-    
-    .card p {
-        margin: 0;
-        color: #666;
-        font-size: 0.95rem;
-        font-weight: 500;
-    }
-    
-    .chart-container {
-        background: white;
-        padding: 1.8rem;
-        border-radius: 8px;
-        border: 1px solid #e0e0e0;
-        box-shadow: 0 3px 6px rgba(0,0,0,0.08);
-    }
-    
-    a[href*="logout"] {
-        background: #333;
-        padding: 8px 16px;
-        border-radius: 4px;
-        transition: background 0.3s ease;
-    }
-    
-    a[href*="logout"]:hover {
-        background: #555;
-    }
+
+}
 </style>
 </head>
 <body>
