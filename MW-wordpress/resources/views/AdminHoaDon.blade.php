@@ -913,9 +913,7 @@
         });
     }
 
-    // ============================
-    // ĐỒNG BỘ NGÀY LẬP
-    // ============================
+    
     
     function syncNgayLap(maHoaDon) {
         console.log('Syncing date for hoadon:', maHoaDon);
@@ -943,16 +941,13 @@
         });
     }
 
-    // ============================
-    // RESET TRANG
-    // ============================
     
     function resetPage() {
         console.log('Resetting page...');
         location.reload();
     }
 
-    // Gán sự kiện cho nút reset nếu có
+   
     document.addEventListener('DOMContentLoaded', function() {
         const resetBtn = document.querySelector('a[href*="/admin/hoadon"]');
         if (resetBtn) {
