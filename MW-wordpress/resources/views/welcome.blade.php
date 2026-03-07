@@ -4,55 +4,73 @@
 
 
     <style>
-        body {
-            background-image: url('/img/riri-williams-3840x2160-22692.jpg');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-             height: min(1100px)
+    body {
+        background-image: url('/img/riri-williams-3840x2160-22692.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        min-height: 100vh;
+        margin: 0;
+    }
 
-        }
+    .main-content {
+        flex: 1;
+    }
 
+    .welcome-content {
+        color: white;
+        text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.8);
+        font-size: 2rem;
+        font-weight: bold;
 
-.main-content {
-  flex: 1; /* Chiếm phần còn lại giữa navbar và footer */
-}
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
 
+        height: 85vh;
+        text-align: center;
+        padding-top: 60px;
+    }
 
-        .welcome-content {
-            color: white;
-            text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-            font-size: 2rem;
-            font-weight: bold;
-            display: flex;
-            flex-direction: column;
+    .nav-item {
+        margin: 0 10px;
+        font-size: 18px;
+    }
 
-            justify-content: center;
-            align-items: center;
-            height: 85vh;
-            text-align: center;
+    .nav-link {
+        transition: 0.3s;
+    }
 
-        }
+    .nav-link:hover {
+        color: #ffc107 !important;
+    }
 
+    .head-controll {
+        position: fixed;
+        top: 0;
+        width: 100%;
+        z-index: 1000;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+    }
 
-        .nav-item{
-            margin: 5px 10px;
-            font-size: 20px;
-        }
-        .head-controll{
-            position:fixed;
-            width: 100%;
-            box-shadow: rgb(48, 96, 163);
+    .btn {
+        padding: 12px 28px;
+        background-color: white;
+        color: black;
+        border-radius: 50px;
+        margin-top: 25px;
+        font-weight: 600;
+        border: none;
+        transition: all 0.3s ease;
+    }
 
-        }
-        .btn{
-            padding: 10px 20px;
-            background-color: rgb(255, 255, 255);
-            color: black;
-            border-radius: 50px;
-            margin-top: 20px;
-        }
-    </style>
+    .btn:hover {
+        background-color: #ffc107;
+        color: black;
+        transform: scale(1.05);
+    }
+</style>
 </head>
 
 <body>
